@@ -12,11 +12,11 @@ class KlaviyoClient
 {
     use Macroable;
 
-    protected string $baseUri = "https://a.klaviyo.com/api/";
+    protected string $baseUri = 'https://a.klaviyo.com/api/';
 
     /**
-     * @param string $privateKey
-     * @param string $publicKey
+     * @param  string  $privateKey
+     * @param  string  $publicKey
      */
     public function __construct(protected string $privateKey, protected string $publicKey)
     {
@@ -41,9 +41,9 @@ class KlaviyoClient
     public function request(): PendingRequest
     {
         return Http::withOptions([
-            'base_uri' => $this->baseUri
+            'base_uri' => $this->baseUri,
         ])->withHeaders([
-            'Accept' => 'text/html'
+            'Accept' => 'text/html',
         ]);
     }
 

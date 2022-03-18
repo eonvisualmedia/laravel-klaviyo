@@ -3,7 +3,7 @@
 return [
 
     /**
-     * Name of the queue to run Klaviyo calls on
+     * Name of the queue to run Klaviyo calls on.
      */
     'queue' => env('KLAVIYO_QUEUE', 'klaviyo'),
 

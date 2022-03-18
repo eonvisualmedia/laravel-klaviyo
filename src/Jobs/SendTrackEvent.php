@@ -14,6 +14,7 @@ class SendTrackEvent
 
     /**
      * Unix timestamp of when the event occurred.
+     *
      * @link https://php.net/manual/en/datetime.gettimestamp.php
      */
     protected int $timestamp;
@@ -32,8 +33,8 @@ class SendTrackEvent
                 'event'               => $this->event,
                 'customer_properties' => $this->identity,
                 'properties'          => $this->properties,
-                'time'                => $this->timestamp
-            ])
+                'time'                => $this->timestamp,
+            ]),
         ])->throw();
     }
 }
