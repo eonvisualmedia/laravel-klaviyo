@@ -88,7 +88,7 @@ class KlaviyoClient
     public function track(string $event, array $properties = [], KlaviyoIdentity|string $identity = null)
     {
         $identity = $this->resolveIdentity($identity);
-        if (!empty($identity)) {
+        if (! empty($identity)) {
             dispatch(new SendTrackEvent($event, $properties, $identity));
         }
     }
@@ -100,7 +100,7 @@ class KlaviyoClient
     public function identify(KlaviyoIdentity|string $identity = null)
     {
         $identity = $this->resolveIdentity($identity);
-        if (!empty($identity)) {
+        if (! empty($identity)) {
             dispatch(new SendIdentify($identity));
         }
     }
