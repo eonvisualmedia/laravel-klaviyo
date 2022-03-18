@@ -14,7 +14,7 @@ class LaravelKlaviyoServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__ . '/../config/klaviyo.php' => config_path('klaviyo.php'),
+            __DIR__.'/../config/klaviyo.php' => config_path('klaviyo.php'),
         ]);
     }
 
@@ -26,7 +26,7 @@ class LaravelKlaviyoServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__ . '/../config/klaviyo.php', 'klaviyo'
+            __DIR__.'/../config/klaviyo.php', 'klaviyo'
         );
 
         // Don't register if not configured.
