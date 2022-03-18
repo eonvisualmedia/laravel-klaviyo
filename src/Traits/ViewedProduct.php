@@ -1,6 +1,6 @@
 <?php
 
-namespace EonVisualMedia\LaravelKlaviyo\Contracts;
+namespace EonVisualMedia\LaravelKlaviyo\Traits;
 
 trait ViewedProduct
 {
