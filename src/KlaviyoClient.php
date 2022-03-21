@@ -3,6 +3,7 @@
 namespace EonVisualMedia\LaravelKlaviyo;
 
 use EonVisualMedia\LaravelKlaviyo\Contracts\KlaviyoIdentity;
+use EonVisualMedia\LaravelKlaviyo\Exceptions\KlaviyoException;
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoIdentify;
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoTrack;
 use Illuminate\Http\Client\PendingRequest;
@@ -22,6 +23,17 @@ class KlaviyoClient
      * @var string
      */
     protected string $identityKeyName = '$email';
+
+    /**
+     * Attributes used for the identification of an Identify Profile.
+     *
+     * @var string[]
+     */
+    protected array $identifyAttributes = [
+        '$email',
+        '$id',
+        '$phone_number',
+    ];
 
     /**
      * @param  string  $privateKey
@@ -101,10 +113,12 @@ class KlaviyoClient
      * @param  array  $properties
      * @param  KlaviyoIdentity|string|null  $identity
      * @return void
+     * @throws KlaviyoException
      */
     public function track(string $event, array $properties = [], KlaviyoIdentity|string $identity = null)
     {
         $identity = $this->resolveIdentity($identity);
+        $this->validateIdentity($identity);
         if (! empty($identity)) {
             dispatch(new SendKlaviyoTrack($event, $properties, $identity));
         }
@@ -113,10 +127,12 @@ class KlaviyoClient
     /**
      * @param  KlaviyoIdentity|string|null  $identity
      * @return void
+     * @throws KlaviyoException
      */
     public function identify(KlaviyoIdentity|string $identity = null)
     {
         $identity = $this->resolveIdentity($identity);
+        $this->validateIdentity($identity);
         if (! empty($identity)) {
             dispatch(new SendKlaviyoIdentify($identity));
         }
@@ -136,6 +152,22 @@ class KlaviyoClient
             return [$this->getIdentityKeyName() => $identity];
         } else {
             return null;
+        }
+    }
+
+    /**
+     * @throws KlaviyoException
+     */
+    private function validateIdentity(array $identity = []): void
+    {
+        $profileIdentity = array_intersect_key($identity, array_flip($this->identifyAttributes));
+        if (empty($profileIdentity)) {
+            throw new KlaviyoException(
+                sprintf(
+                    'Identify requires one of the following fields: %s',
+                    implode(', ', $this->identifyAttributes)
+                )
+            );
         }
     }
 }
