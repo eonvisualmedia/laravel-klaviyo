@@ -20,12 +20,12 @@
     },
     "autoload": {
         "psr-4": {
-            "EonVisualMedia\\LaravelKlaviyo\\": "src/"
+            "EonVisualMedia\\LaravelKlaviyo\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Spatie\\Tags\\Test\\": "tests"
+            "EonVisualMedia\\LaravelKlaviyo\\Test\\": "tests"
         }
     },
     "config": {
