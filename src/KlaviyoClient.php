@@ -113,6 +113,7 @@ class KlaviyoClient
      * @param  array  $properties
      * @param  KlaviyoIdentity|string|null  $identity
      * @return void
+     *
      * @throws KlaviyoException
      */
     public function track(string $event, array $properties = [], KlaviyoIdentity|string $identity = null)
@@ -127,6 +128,7 @@ class KlaviyoClient
     /**
      * @param  KlaviyoIdentity|string|null  $identity
      * @return void
+     *
      * @throws KlaviyoException
      */
     public function identify(KlaviyoIdentity|string $identity = null)
