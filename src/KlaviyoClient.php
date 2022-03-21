@@ -17,7 +17,7 @@ class KlaviyoClient
     protected string $baseUri = 'https://a.klaviyo.com/api/';
 
     /**
-     * The key for the identity
+     * The key for the identity.
      *
      * @var string
      */
@@ -67,7 +67,7 @@ class KlaviyoClient
     }
 
     /**
-     * The key for the identity
+     * The key for the identity.
      *
      * @return string
      */
