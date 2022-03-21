@@ -109,6 +109,8 @@ class KlaviyoClient
     }
 
     /**
+     * Submit a server-side track event to Klaviyo.
+     *
      * @param  string  $event
      * @param  array  $properties
      * @param  KlaviyoIdentity|string|null  $identity
@@ -126,6 +128,8 @@ class KlaviyoClient
     }
 
     /**
+     * Submit a server-side identify event to Klaviyo.
+     *
      * @param  KlaviyoIdentity|string|null  $identity
      * @return void
      *
