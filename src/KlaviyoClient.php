@@ -3,8 +3,8 @@
 namespace EonVisualMedia\LaravelKlaviyo;
 
 use EonVisualMedia\LaravelKlaviyo\Contracts\KlaviyoIdentity;
-use EonVisualMedia\LaravelKlaviyo\Jobs\SendIdentify;
-use EonVisualMedia\LaravelKlaviyo\Jobs\SendTrackEvent;
+use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoIdentify;
+use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoTrack;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -106,7 +106,7 @@ class KlaviyoClient
     {
         $identity = $this->resolveIdentity($identity);
         if (! empty($identity)) {
-            dispatch(new SendTrackEvent($event, $properties, $identity));
+            dispatch(new SendKlaviyoTrack($event, $properties, $identity));
         }
     }
 
@@ -118,7 +118,7 @@ class KlaviyoClient
     {
         $identity = $this->resolveIdentity($identity);
         if (! empty($identity)) {
-            dispatch(new SendIdentify($identity));
+            dispatch(new SendKlaviyoIdentify($identity));
         }
     }
 

@@ -7,7 +7,7 @@ use EonVisualMedia\LaravelKlaviyo\KlaviyoClient;
 use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
 
-class SendTrackEvent
+class SendKlaviyoTrack
 {
     use Dispatchable;
     use Queueable;

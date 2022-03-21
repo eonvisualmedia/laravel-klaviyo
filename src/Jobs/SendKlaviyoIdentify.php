@@ -6,7 +6,7 @@ use EonVisualMedia\LaravelKlaviyo\KlaviyoClient;
 use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
 
-class SendIdentify
+class SendKlaviyoIdentify
 {
     use Dispatchable;
     use Queueable;
