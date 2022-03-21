@@ -13,7 +13,7 @@ class SendIdentify
 
     public function __construct(protected array $identity)
     {
-        $this->queue = config('klaviyo.queue');
+        $this->onQueue(config('klaviyo.queue'));
     }
 
     public function handle(KlaviyoClient $client)

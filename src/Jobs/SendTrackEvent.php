@@ -21,7 +21,7 @@ class SendTrackEvent
 
     public function __construct(protected string $event, protected ?array $properties, protected array $identity)
     {
-        $this->queue = config('klaviyo.queue');
+        $this->onQueue(config('klaviyo.queue'));
         $this->timestamp = Carbon::now()->getTimestamp();
     }
 
