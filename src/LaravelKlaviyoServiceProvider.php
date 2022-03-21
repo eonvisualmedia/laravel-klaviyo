@@ -35,7 +35,16 @@ class LaravelKlaviyoServiceProvider extends ServiceProvider
         }
 
         $this->app->singleton(KlaviyoClient::class, function () {
-            return new KlaviyoClient(config('klaviyo.private_api_key'), config('klaviyo.public_api_key'));
+            $client = new KlaviyoClient(
+                config('klaviyo.private_api_key'),
+                config('klaviyo.public_api_key')
+            );
+
+            if (! is_null($identityKeyName = config('klaviyo.identity_key_name'))) {
+                $client->setIdentityKeyName($identityKeyName);
+            }
+
+            return $client;
         });
 
         $this->app->alias(KlaviyoClient::class, 'klaviyo');

@@ -15,7 +15,13 @@ class KlaviyoClient
     use Macroable;
 
     protected string $baseUri = 'https://a.klaviyo.com/api/';
-    protected string $identifierKey = '$email';
+
+    /**
+     * The key for the identity
+     *
+     * @var string
+     */
+    protected string $identityKeyName = '$email';
 
     /**
      * @param  string  $privateKey
@@ -35,10 +41,13 @@ class KlaviyoClient
 
     /**
      * @param  string  $baseUri
+     * @return KlaviyoClient
      */
-    public function setBaseUri(string $baseUri): void
+    public function setBaseUri(string $baseUri): KlaviyoClient
     {
         $this->baseUri = $baseUri;
+
+        return $this;
     }
 
     /**
@@ -57,17 +66,25 @@ class KlaviyoClient
         return $this->publicKey;
     }
 
-    public function getIdentifierKey(): string
+    /**
+     * The key for the identity
+     *
+     * @return string
+     */
+    public function getIdentityKeyName(): string
     {
-        return $this->identifierKey;
+        return $this->identityKeyName;
     }
 
     /**
-     * @param  string  $identifierKey
+     * @param  string  $identityKeyName
+     * @return KlaviyoClient
      */
-    public function setIdentifierKey(string $identifierKey): void
+    public function setIdentityKeyName(string $identityKeyName): KlaviyoClient
     {
-        $this->identifierKey = $identifierKey;
+        $this->identityKeyName = $identityKeyName;
+
+        return $this;
     }
 
     public function request(): PendingRequest
@@ -116,7 +133,7 @@ class KlaviyoClient
         if ($identity instanceof KlaviyoIdentity) {
             return $identity->getKlaviyoIdentity();
         } elseif (is_string($identity)) {
-            return [$this->getIdentifierKey() => $identity];
+            return [$this->getIdentityKeyName() => $identity];
         } else {
             return null;
         }
