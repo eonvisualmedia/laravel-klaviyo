@@ -7,6 +7,7 @@ use EonVisualMedia\LaravelKlaviyo\Exceptions\KlaviyoException;
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoIdentify;
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoTrack;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Traits\Macroable;
@@ -175,5 +176,25 @@ class KlaviyoClient
                 )
             );
         }
+    }
+
+    /**
+     * Decode the __kla_id cookie.
+     *
+     * @return array
+     */
+    public function getDecodedCookie(): array
+    {
+        return json_decode(base64_decode(request()->cookie('__kla_id')), true) ?? [];
+    }
+
+    /**
+     * Does the \Illuminate\Http\Request cookie contain an $exchange_id?
+     *
+     * @return bool
+     */
+    public function isIdentified(): bool
+    {
+        return Arr::get($this->getDecodedCookie(), '$exchange_id') !== null;
     }
 }
