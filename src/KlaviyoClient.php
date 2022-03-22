@@ -243,6 +243,7 @@ class KlaviyoClient
      *
      * @param  ViewedProduct  $product
      * @return void
+     *
      * @throws KlaviyoException
      */
     public function pushViewed(ViewedProduct $product)

@@ -15,7 +15,7 @@ class InitializeCreator
     public function create(View $view)
     {
         $view->with('data', $this->client->getPushCollection()
-            ->map(fn($value) => array_map(fn($item) => Js::from($item), $value))
+            ->map(fn ($value) => array_map(fn ($item) => Js::from($item), $value))
         );
     }
 }
