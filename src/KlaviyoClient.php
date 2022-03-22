@@ -34,6 +34,7 @@ class KlaviyoClient
         '$email',
         '$id',
         '$phone_number',
+        '$exchange_id',
     ];
 
     /**
@@ -136,7 +137,7 @@ class KlaviyoClient
      */
     public function identify(KlaviyoIdentity|string $identity = null)
     {
-        $identity = $this->resolveIdentity($identity);
+        $identity = $this->resolveIdentity($identity ?? Auth::user());
         $this->validateIdentity($identity);
         if (! empty($identity)) {
             dispatch(new SendKlaviyoIdentify($identity));
@@ -149,6 +150,10 @@ class KlaviyoClient
      */
     private function resolveIdentity(KlaviyoIdentity|string $identity = null): ?array
     {
+        if ($identity === null && $this->isIdentified()) {
+            return ['$exchange_id' => $this->getExchangeId()];
+        }
+
         $identity = $identity ?? Auth::user();
 
         if ($identity instanceof KlaviyoIdentity) {
@@ -193,6 +198,17 @@ class KlaviyoClient
      */
     public function isIdentified(): bool
     {
-        return Arr::get($this->getDecodedCookie(), '$exchange_id') !== null;
+        return ! empty($this->getExchangeId());
+    }
+
+    /**
+     * Retrieve the $exchange_id from cookie.
+     *
+     * @return string|null
+     */
+    public function getExchangeId(): ?string
+    {
+        return Arr::get($this->getDecodedCookie(), '$exchange_id');
+    }
     }
 }
