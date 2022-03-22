@@ -19,10 +19,10 @@ class SendKlaviyoTrack
      */
     protected int $timestamp;
 
-    public function __construct(protected string $event, protected ?array $properties, protected array $identity)
+    public function __construct(protected string $event, protected ?array $properties, protected array $identity, int $timestamp = null)
     {
         $this->onQueue(config('klaviyo.queue'));
-        $this->timestamp = Carbon::now()->getTimestamp();
+        $this->timestamp = $timestamp ?? Carbon::now()->getTimestamp();
     }
 
     public function handle(KlaviyoClient $client)

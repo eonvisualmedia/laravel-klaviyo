@@ -119,16 +119,17 @@ class KlaviyoClient
      * @param  string  $event
      * @param  array  $properties
      * @param  KlaviyoIdentity|string|null  $identity
+     * @param  int|null  $timestamp  Unix timestamp of when the event occurred
      * @return void
      *
      * @throws KlaviyoException
      */
-    public function track(string $event, array $properties = [], KlaviyoIdentity|string $identity = null)
+    public function track(string $event, array $properties = [], KlaviyoIdentity|string $identity = null, int $timestamp = null)
     {
         $identity = $this->resolveIdentity($identity);
         $this->validateIdentity($identity);
         if (! empty($identity)) {
-            dispatch(new SendKlaviyoTrack($event, $properties, $identity));
+            dispatch(new SendKlaviyoTrack($event, $properties, $identity, $timestamp));
         }
     }
 
