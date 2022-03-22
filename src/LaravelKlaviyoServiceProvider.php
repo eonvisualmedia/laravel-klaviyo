@@ -2,7 +2,6 @@
 
 namespace EonVisualMedia\LaravelKlaviyo;
 
-use EonVisualMedia\LaravelKlaviyo\View\Composers\IdentityComposer;
 use EonVisualMedia\LaravelKlaviyo\View\Creators\InitializeCreator;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -19,8 +18,6 @@ class LaravelKlaviyoServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../config/klaviyo.php' => config_path('klaviyo.php'),
         ]);
-
-        View::composer('klaviyo::identify', IdentityComposer::class);
 
         View::creator('klaviyo::initialize', InitializeCreator::class);
     }

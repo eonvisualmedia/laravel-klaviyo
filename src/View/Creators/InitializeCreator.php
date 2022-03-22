@@ -2,7 +2,9 @@
 
 namespace EonVisualMedia\LaravelKlaviyo\View\Creators;
 
+use EonVisualMedia\LaravelKlaviyo\Contracts\KlaviyoIdentity;
 use EonVisualMedia\LaravelKlaviyo\KlaviyoClient;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Js;
 use Illuminate\View\View;
 
@@ -14,6 +16,14 @@ class InitializeCreator
 
     public function create(View $view)
     {
+        // If the identity isn't already set in cookie get the identity from the current user unless an identity is already pending push
+        if (! $this->client->isIdentified() && $this->client->getPushCollection()->filter(fn ($item) => $item[0] === 'identify')->isEmpty()) {
+            $user = Auth::user();
+            if ($user instanceof KlaviyoIdentity) {
+                $this->client->push('identify', $user->getKlaviyoIdentity());
+            }
+        }
+
         $view->with('data', $this->client->getPushCollection()
             ->map(fn ($value) => array_map(fn ($item) => Js::from($item), $value))
         );
