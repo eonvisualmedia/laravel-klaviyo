@@ -29,6 +29,10 @@ class LaravelKlaviyoServiceProvider extends ServiceProvider
             __DIR__.'/../config/klaviyo.php', 'klaviyo'
         );
 
+        $this->loadViewsFrom(
+            __DIR__.'/../resources/views', 'klaviyo'
+        );
+
         // Don't register if not configured.
         if ($this->stop()) {
             return;
