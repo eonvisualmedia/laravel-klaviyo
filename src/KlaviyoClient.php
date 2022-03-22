@@ -3,11 +3,13 @@
 namespace EonVisualMedia\LaravelKlaviyo;
 
 use EonVisualMedia\LaravelKlaviyo\Contracts\KlaviyoIdentity;
+use EonVisualMedia\LaravelKlaviyo\Contracts\ViewedProduct;
 use EonVisualMedia\LaravelKlaviyo\Exceptions\KlaviyoException;
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoIdentify;
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoTrack;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Traits\Macroable;
@@ -37,12 +39,15 @@ class KlaviyoClient
         '$exchange_id',
     ];
 
+    protected Collection $pushCollection;
+
     /**
      * @param  string  $privateKey
      * @param  string  $publicKey
      */
     public function __construct(protected string $privateKey, protected string $publicKey)
     {
+        $this->pushCollection = new Collection();
     }
 
     /**
@@ -210,5 +215,39 @@ class KlaviyoClient
     {
         return Arr::get($this->getDecodedCookie(), '$exchange_id');
     }
+
+    /**
+     * @return Collection
+     */
+    public function getPushCollection(): Collection
+    {
+        return $this->pushCollection;
+    }
+
+    /**
+     * Push a track event to be rendered by the client.
+     *
+     * @throws KlaviyoException
+     */
+    public function push(...$values)
+    {
+        if (count($values) > 3) {
+            throw new KlaviyoException('Too many arguments for track push.');
+        }
+
+        $this->pushCollection->push($values);
+    }
+
+    /**
+     * Push a viewed product event to be rendered by the client.
+     *
+     * @param  ViewedProduct  $product
+     * @return void
+     * @throws KlaviyoException
+     */
+    public function pushViewed(ViewedProduct $product)
+    {
+        $this->push('track', 'Viewed Product', $product->getViewedProductProperties());
+        $this->push('trackViewedItem', $product->getViewedItemProperties());
     }
 }
