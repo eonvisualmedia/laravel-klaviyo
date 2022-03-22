@@ -18,11 +18,9 @@ class SendKlaviyoIdentify
 
     public function handle(KlaviyoClient $client)
     {
-        $client->request()->asForm()->post('identify', [
-            'data' => json_encode([
-                'token'      => $client->getPublicKey(),
-                'properties' => $this->identity,
-            ]),
+        $client->request()->post('identify', [
+            'token'      => $client->getPublicKey(),
+            'properties' => $this->identity,
         ])->throw();
     }
 }

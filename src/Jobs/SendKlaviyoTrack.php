@@ -27,14 +27,14 @@ class SendKlaviyoTrack
 
     public function handle(KlaviyoClient $client)
     {
-        $client->request()->asForm()->post('track', [
-            'data' => json_encode([
-                'token'               => $client->getPublicKey(),
-                'event'               => $this->event,
-                'customer_properties' => $this->identity,
-                'properties'          => $this->properties,
-                'time'                => $this->timestamp,
-            ]),
-        ])->throw();
+        $payload = [
+            'token'               => $client->getPublicKey(),
+            'event'               => $this->event,
+            'customer_properties' => $this->identity,
+            'properties'          => $this->properties,
+            'time'                => $this->timestamp,
+        ];
+
+        $client->request()->post('track', $payload)->throw();
     }
 }

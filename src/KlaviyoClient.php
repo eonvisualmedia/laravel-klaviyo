@@ -104,8 +104,6 @@ class KlaviyoClient
     {
         return Http::withOptions([
             'base_uri' => $this->baseUri,
-        ])->withHeaders([
-            'Accept' => 'text/html',
         ]);
     }
 
