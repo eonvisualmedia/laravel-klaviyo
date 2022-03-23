@@ -226,14 +226,14 @@ class KlaviyoClient
     }
 
     /**
-     * Push a track event to be rendered by the client.
+     * Push an event to be rendered by the client.
      *
      * @throws KlaviyoException
      */
     public function push(...$values)
     {
         if (count($values) > 3) {
-            throw new KlaviyoException('Too many arguments for track push.');
+            throw new KlaviyoException('Too many arguments for push.');
         }
 
         $this->pushCollection->push($values);
