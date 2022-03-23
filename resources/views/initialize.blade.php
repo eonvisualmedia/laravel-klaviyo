@@ -1,4 +1,4 @@
-<script type="application/javascript" async src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id={{app(\EonVisualMedia\LaravelKlaviyo\KlaviyoClient::class)->getPublicKey()}}"></script>
+<script type="application/javascript" async src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id={{$publicKey}}"></script>
 @if($data->isNotEmpty())
 <script type="application/javascript">
 var _learnq = window._learnq || [];
