@@ -288,7 +288,8 @@ class KlaviyoClient
      */
     public function pushViewed(ViewedProduct $product)
     {
-        $this->push('track', 'Viewed Product', $product->getViewedProductProperties());
-        $this->push('trackViewedItem', $product->getViewedItemProperties());
+        $item = $product->getViewedProductProperties();
+        $this->push('track', 'Viewed Product', $item);
+        $this->push('trackViewedItem', $item);
     }
 }
