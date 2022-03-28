@@ -42,6 +42,11 @@ class KlaviyoClient
     protected Collection $pushCollection;
 
     /**
+     * @var bool
+     */
+    protected bool $enabled = true;
+
+    /**
      * @param  string  $privateKey
      * @param  string  $publicKey
      */
@@ -106,6 +111,32 @@ class KlaviyoClient
         return $this;
     }
 
+    /**
+     * Check whether Klaviyo script rendering and server-side jobs is enabled.
+     *
+     * @return bool
+     */
+    public function isEnabled()
+    {
+        return $this->enabled;
+    }
+
+    /**
+     * Enable Klaviyo script rendering and server-side jobs.
+     */
+    public function enable()
+    {
+        $this->enabled = true;
+    }
+
+    /**
+     * Disable Klaviyo script rendering and server-side jobs.
+     */
+    public function disable()
+    {
+        $this->enabled = false;
+    }
+
     public function request(): PendingRequest
     {
         return Http::withOptions([
@@ -126,6 +157,10 @@ class KlaviyoClient
      */
     public function track(string $event, array $properties = [], KlaviyoIdentity|string $identity = null, int $timestamp = null)
     {
+        if (! $this->isEnabled()) {
+            return;
+        }
+
         $identity = $this->resolveIdentity($identity);
         $this->validateIdentity($identity);
         if (! empty($identity)) {
@@ -143,6 +178,10 @@ class KlaviyoClient
      */
     public function identify(KlaviyoIdentity|string $identity = null)
     {
+        if (! $this->isEnabled()) {
+            return;
+        }
+
         $identity = $this->resolveIdentity($identity ?? Auth::user());
         $this->validateIdentity($identity);
         if (! empty($identity)) {

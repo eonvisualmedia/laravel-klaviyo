@@ -48,6 +48,10 @@ class LaravelKlaviyoServiceProvider extends ServiceProvider
                 config('klaviyo.public_api_key')
             );
 
+            if (config('klaviyo.enabled') === false) {
+                $client->disable();
+            }
+
             if (! is_null($identityKeyName = config('klaviyo.identity_key_name'))) {
                 $client->setIdentityKeyName($identityKeyName);
             }

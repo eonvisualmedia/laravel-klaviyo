@@ -3,15 +3,15 @@
 return [
 
     /*
-    |--------------------------------------------------------------------------
-    | Klaviyo Queue Connection Name
-    |--------------------------------------------------------------------------
-    |
-    | The queue on which jobs will be processed.
-    |
-    */
+     * Enable or disable Klaviyo script rendering and server-side jobs.
+     * Useful for local development.
+     */
+    'enabled' => (bool) env('KLAVIYO_ENABLED', true),
 
-    'queue' => env('KLAVIYO_QUEUE', 'klaviyo'),
+    /**
+     * The queue on which jobs will be processed.
+     */
+    'queue'   => env('KLAVIYO_QUEUE', 'klaviyo'),
 
     'private_api_key' => env('KLAVIYO_PRIVATE_API_KEY'),
 

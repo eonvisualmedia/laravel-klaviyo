@@ -25,6 +25,7 @@ class InitializeCreator
         }
 
         $view
+            ->with('enabled', $this->client->isEnabled())
             ->with('publicKey', $this->client->getPublicKey())
             ->with('data', $this->client->getPushCollection()
                 ->map(fn ($value) => array_map(fn ($item) => Js::from($item), $value))
