@@ -37,11 +37,6 @@ class LaravelKlaviyoServiceProvider extends ServiceProvider
             __DIR__.'/../resources/views', 'klaviyo'
         );
 
-        // Don't register if not configured.
-        if ($this->stop()) {
-            return;
-        }
-
         $this->app->singleton(KlaviyoClient::class, function () {
             $client = new KlaviyoClient(
                 config('klaviyo.private_api_key'),
@@ -60,10 +55,5 @@ class LaravelKlaviyoServiceProvider extends ServiceProvider
         });
 
         $this->app->alias(KlaviyoClient::class, 'klaviyo');
-    }
-
-    private function stop(): bool
-    {
-        return empty(config('klaviyo.private_api_key')) || empty(config('klaviyo.public_api_key'));
     }
 }
