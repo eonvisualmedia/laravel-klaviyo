@@ -163,8 +163,7 @@ class KlaviyoClient
         }
 
         $identity = $this->resolveIdentity($identity);
-        $this->validateIdentity($identity);
-        if (! empty($identity)) {
+        if ($identity !== null) {
             dispatch(new SendKlaviyoTrack($event, $properties, $identity, $timestamp));
         }
     }
@@ -172,52 +171,48 @@ class KlaviyoClient
     /**
      * Submit a server-side identify event to Klaviyo.
      *
-     * @param  KlaviyoIdentity|string|null  $identity
+     * @param  KlaviyoIdentity|string|array|null  $identity
      * @return void
      *
      * @throws KlaviyoException
      */
-    public function identify(KlaviyoIdentity|string $identity = null)
+    public function identify(KlaviyoIdentity|string|array $identity = null)
     {
         if (! $this->isEnabled()) {
             return;
         }
 
         $identity = $this->resolveIdentity($identity ?? Auth::user());
-        $this->validateIdentity($identity);
-        if (! empty($identity)) {
+        if ($identity !== null) {
             dispatch(new SendKlaviyoIdentify($identity));
         }
     }
 
     /**
-     * @param  KlaviyoIdentity|string|null  $identity
+     * @param  KlaviyoIdentity|string|array|null  $identity
      * @return array|null
+     *
+     * @throws KlaviyoException
      */
-    private function resolveIdentity(KlaviyoIdentity|string $identity = null): ?array
+    private function resolveIdentity(KlaviyoIdentity|string|array $identity = null): ?array
     {
         if ($identity === null && $this->isIdentified()) {
             return $this->getIdentity();
         }
 
-        $identity = $identity ?? Auth::user();
+        $identity = with($identity ?? Auth::user(), function ($value) {
+            if ($value instanceof KlaviyoIdentity) {
+                return $value->getKlaviyoIdentity();
+            } elseif (is_string($value)) {
+                return [$this->getIdentityKeyName() => $value];
+            } elseif (is_array($value)) {
+                return $value;
+            } else {
+                return null;
+            }
+        });
 
-        if ($identity instanceof KlaviyoIdentity) {
-            return $identity->getKlaviyoIdentity();
-        } elseif (is_string($identity)) {
-            return [$this->getIdentityKeyName() => $identity];
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * @throws KlaviyoException
-     */
-    private function validateIdentity(array $identity = null): void
-    {
-        $profileIdentity = array_intersect_key($identity ?? [], array_flip($this->identifyAttributes));
-        if (empty($profileIdentity)) {
+        if (empty(array_intersect_key($identity ?? [], array_flip($this->identifyAttributes)))) {
             throw new KlaviyoException(
                 sprintf(
                     'Identify requires one of the following fields: %s',
@@ -225,6 +220,8 @@ class KlaviyoClient
                 )
             );
         }
+
+        return $identity;
     }
 
     /**
