@@ -233,7 +233,7 @@ class KlaviyoClient
      */
     public function getDecodedCookie(): array
     {
-        return json_decode(base64_decode(request()->cookie('__kla_id')), true) ?? [];
+        return json_decode(base64_decode(Cookie::get('__kla_id')), true) ?? [];
     }
 
     /**
