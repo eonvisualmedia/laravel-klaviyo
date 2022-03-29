@@ -26,6 +26,8 @@ abstract class TestCase extends Orchestra
                 }
             });
         });
+
+        $router->view('/render', 'klaviyo::initialize');
     }
 
     protected function withKlaviyoCookie(array $value): TestCase
