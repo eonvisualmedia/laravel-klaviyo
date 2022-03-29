@@ -25,15 +25,50 @@ class SendKlaviyoTrack
         $this->timestamp = $timestamp ?? Carbon::now()->getTimestamp();
     }
 
+    /**
+     * @return string
+     */
+    public function getEvent(): string
+    {
+        return $this->event;
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getProperties(): ?array
+    {
+        return $this->properties;
+    }
+
+    /**
+     * @return array
+     */
+    public function getIdentity(): array
+    {
+        return $this->identity;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTimestamp(): int
+    {
+        return $this->timestamp;
+    }
+
     public function handle(KlaviyoClient $client)
     {
         $payload = [
             'token'               => $client->getPublicKey(),
             'event'               => $this->event,
             'customer_properties' => $this->identity,
-            'properties'          => $this->properties,
             'time'                => $this->timestamp,
         ];
+
+        if (null !== $this->properties) {
+            $payload['properties'] = $this->properties;
+        }
 
         $client->request()->post('track', $payload)->throw();
     }

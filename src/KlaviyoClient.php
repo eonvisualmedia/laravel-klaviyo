@@ -149,14 +149,14 @@ class KlaviyoClient
      * Submit a server-side track event to Klaviyo.
      *
      * @param  string  $event
-     * @param  array  $properties
+     * @param  array|null  $properties
      * @param  KlaviyoIdentity|string|null  $identity
      * @param  int|null  $timestamp  Unix timestamp of when the event occurred
      * @return void
      *
      * @throws KlaviyoException
      */
-    public function track(string $event, array $properties = [], KlaviyoIdentity|string $identity = null, int $timestamp = null)
+    public function track(string $event, array $properties = null, KlaviyoIdentity|string $identity = null, int $timestamp = null)
     {
         if (! $this->isEnabled()) {
             return;
@@ -214,9 +214,9 @@ class KlaviyoClient
     /**
      * @throws KlaviyoException
      */
-    private function validateIdentity(array $identity = []): void
+    private function validateIdentity(array $identity = null): void
     {
-        $profileIdentity = array_intersect_key($identity, array_flip($this->identifyAttributes));
+        $profileIdentity = array_intersect_key($identity ?? [], array_flip($this->identifyAttributes));
         if (empty($profileIdentity)) {
             throw new KlaviyoException(
                 sprintf(

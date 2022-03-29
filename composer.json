@@ -15,6 +15,7 @@
         "illuminate/support": "^8.0|^9.0"
     },
     "require-dev": {
+        "guzzlehttp/guzzle": "^7.0",
         "orchestra/testbench": "^6.17|^7.0",
         "phpunit/phpunit": "^9.3"
     },
@@ -27,6 +28,9 @@
         "psr-4": {
             "EonVisualMedia\\LaravelKlaviyo\\Test\\": "tests"
         }
+    },
+    "suggest": {
+        "guzzlehttp/guzzle": "If you want to make server-side api calls"
     },
     "config": {
         "sort-packages": true
