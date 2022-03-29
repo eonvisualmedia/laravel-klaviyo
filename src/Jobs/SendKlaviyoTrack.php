@@ -2,10 +2,13 @@
 
 namespace EonVisualMedia\LaravelKlaviyo\Jobs;
 
-use Carbon\Carbon;
+use EonVisualMedia\LaravelKlaviyo\Contracts\TrackEventInterface;
 use EonVisualMedia\LaravelKlaviyo\KlaviyoClient;
+use GuzzleHttp\Promise\EachPromise;
 use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Http;
 
 class SendKlaviyoTrack
 {
@@ -19,34 +22,20 @@ class SendKlaviyoTrack
      */
     protected int $timestamp;
 
-    public function __construct(protected string $event, protected ?array $properties, protected array $identity, int $timestamp = null)
+    protected array $events;
+
+    public function __construct(TrackEventInterface ...$events)
     {
         $this->onQueue(config('klaviyo.queue'));
-        $this->timestamp = $timestamp ?? Carbon::now()->getTimestamp();
+        $this->timestamp = now()->getTimestamp();
+        $this->events = $events;
     }
 
-    /**
-     * @return string
-     */
-    public function getEvent(): string
+    public function setTimestamp(int $timestamp): static
     {
-        return $this->event;
-    }
+        $this->timestamp = $timestamp;
 
-    /**
-     * @return array|null
-     */
-    public function getProperties(): ?array
-    {
-        return $this->properties;
-    }
-
-    /**
-     * @return array
-     */
-    public function getIdentity(): array
-    {
-        return $this->identity;
+        return $this;
     }
 
     /**
@@ -59,17 +48,32 @@ class SendKlaviyoTrack
 
     public function handle(KlaviyoClient $client)
     {
-        $payload = [
-            'token'               => $client->getPublicKey(),
-            'event'               => $this->event,
-            'customer_properties' => $this->identity,
-            'time'                => $this->timestamp,
-        ];
+        $http = Http::baseUrl($client->getBaseUri())->async();
 
-        if (null !== $this->properties) {
-            $payload['properties'] = $this->properties;
-        }
+        $requests = function () use ($http, $client) {
+            foreach ($this->events as $event) {
+                $payload = [
+                    'token' => $client->getPublicKey(),
+                    'event' => $event->getEvent(),
+                    'customer_properties' => $event->getIdentity(),
+                    'time' => $event->getTimestamp() ?? $this->timestamp,
+                ];
 
-        $client->request()->post('track', $payload)->throw();
+                if (null !== $event->getProperties()) {
+                    $payload['properties'] = $event->getProperties();
+                }
+
+                yield $http->post('track', $payload);
+            }
+        };
+
+        $promise = (new EachPromise($requests(), [
+            'concurrency' => 5,
+            'fulfilled' => function (Response $response) {
+                throw_if($response->failed(), $response->toException());
+            },
+        ]))->promise();
+
+        $promise->wait();
     }
 }

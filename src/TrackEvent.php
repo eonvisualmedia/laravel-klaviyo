@@ -9,10 +9,10 @@ class TrackEvent implements TrackEventInterface
 {
     protected string $event;
     protected array|null $properties;
-    protected string|KlaviyoIdentity|null $identity;
+    protected string|KlaviyoIdentity|array|null $identity;
     protected int|null $timestamp;
 
-    public static function make(string $event, array $properties = null, KlaviyoIdentity|string $identity = null, int $timestamp = null): TrackEvent
+    public static function make(string $event, array $properties = null, KlaviyoIdentity|string|array $identity = null, int $timestamp = null): TrackEvent
     {
         return (new static())
             ->setEvent($event)
@@ -60,18 +60,18 @@ class TrackEvent implements TrackEventInterface
     }
 
     /**
-     * @return KlaviyoIdentity|string|null
+     * @return KlaviyoIdentity|string|array|null
      */
-    public function getIdentity(): KlaviyoIdentity|string|null
+    public function getIdentity(): KlaviyoIdentity|string|array|null
     {
         return $this->identity;
     }
 
     /**
-     * @param  KlaviyoIdentity|string|null  $identity
+     * @param  KlaviyoIdentity|string|array|null  $identity
      * @return TrackEvent
      */
-    public function setIdentity(KlaviyoIdentity|string|null $identity): TrackEvent
+    public function setIdentity(KlaviyoIdentity|string|array|null $identity): TrackEvent
     {
         $this->identity = $identity;
 
