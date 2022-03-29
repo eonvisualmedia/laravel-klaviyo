@@ -275,7 +275,9 @@ class KlaviyoClient
      */
     public function push(...$values)
     {
-        if (count($values) > 3) {
+        if (count($values) === 0) {
+            throw new KlaviyoException('Not enough arguments for push.');
+        } elseif (count($values) > 3) {
             throw new KlaviyoException('Too many arguments for push.');
         }
 
