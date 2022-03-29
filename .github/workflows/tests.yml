@@ -7,13 +7,13 @@ on:
 jobs:
   tests:
     runs-on: ${{ matrix.os }}
-    
+
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest]
-        php: ['8.0', '8.1']
-        stability: [prefer-lowest, prefer-stable]
+        os: [ ubuntu-latest ]
+        php: [ '8.0', '8.1' ]
+        stability: [ prefer-lowest, prefer-stable ]
 
     name: PHP ${{ matrix.php }} - ${{ matrix.stability }}
 
@@ -55,11 +55,3 @@ jobs:
 
       - name: Execute tests
         run: vendor/bin/phpunit --verbose
-
-      - name: Store artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: logs
-          path: |
-            vendor/orchestra/testbench-core/laravel/storage/logs
-            !vendor/**/.gitignore
