@@ -4,7 +4,7 @@
 <script type="application/javascript">
 var _learnq = window._learnq || [];
 @foreach($data as $item)
-_learnq.push([{!! implode(', ', $item) !!}])
+_learnq.push([{!! implode(', ', $item) !!}]);
 @endforeach
 </script>
 @endif
