@@ -20,7 +20,7 @@ class InitializeCreator
         if (! $this->client->isIdentified() && $this->client->getPushCollection()->filter(fn ($item) => $item[0] === 'identify')->isEmpty()) {
             $user = Auth::user();
             if ($user instanceof KlaviyoIdentity) {
-                $this->client->push('identify', $user->getKlaviyoIdentity());
+                $this->client->prepend('identify', $user->getKlaviyoIdentity());
             }
         }
 

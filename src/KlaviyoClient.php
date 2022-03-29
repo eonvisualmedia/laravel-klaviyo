@@ -269,6 +269,22 @@ class KlaviyoClient
     }
 
     /**
+     * Push an event to be rendered by the client to the beginning of the collection.
+     *
+     * @throws KlaviyoException
+     */
+    public function prepend(...$values)
+    {
+        if (count($values) === 0) {
+            throw new KlaviyoException('Not enough arguments for prepend.');
+        } elseif (count($values) > 3) {
+            throw new KlaviyoException('Too many arguments for prepend.');
+        }
+
+        $this->pushCollection->prepend($values);
+    }
+
+    /**
      * Push an event to be rendered by the client.
      *
      * @throws KlaviyoException

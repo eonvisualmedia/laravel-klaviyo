@@ -10,6 +10,20 @@ use Mockery\MockInterface;
 
 class PushTest extends TestCase
 {
+    public function test_prepend_zero_throws()
+    {
+        $this->expectException(KlaviyoException::class);
+
+        Klaviyo::prepend();
+    }
+
+    public function test_prepend_invalid_throws()
+    {
+        $this->expectException(KlaviyoException::class);
+
+        Klaviyo::prepend('track', 'event', ['foo' => 'bar'], 'too many arguments');
+    }
+
     public function test_push_zero_throws()
     {
         $this->expectException(KlaviyoException::class);
