@@ -31,7 +31,6 @@ class TrackEvent implements TrackEventInterface
 
     /**
      * @param  string  $event
-     *
      * @return TrackEvent
      */
     public function setEvent(string $event): TrackEvent
@@ -51,7 +50,6 @@ class TrackEvent implements TrackEventInterface
 
     /**
      * @param  array|null  $properties
-     *
      * @return TrackEvent
      */
     public function setProperties(array|null $properties): TrackEvent
@@ -71,7 +69,6 @@ class TrackEvent implements TrackEventInterface
 
     /**
      * @param  KlaviyoIdentity|string|null  $identity
-     *
      * @return TrackEvent
      */
     public function setIdentity(KlaviyoIdentity|string|null $identity): TrackEvent
@@ -91,7 +88,6 @@ class TrackEvent implements TrackEventInterface
 
     /**
      * @param  int|null  $timestamp
-     *
      * @return TrackEvent
      */
     public function setTimestamp(int $timestamp = null): TrackEvent
