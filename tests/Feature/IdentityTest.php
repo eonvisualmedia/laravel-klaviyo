@@ -1,6 +1,8 @@
 <?php
 
-namespace EonVisualMedia\LaravelKlaviyo\Test;
+namespace EonVisualMedia\LaravelKlaviyo\Test\Feature;
+
+use EonVisualMedia\LaravelKlaviyo\Test\TestCase;
 
 class IdentityTest extends TestCase
 {

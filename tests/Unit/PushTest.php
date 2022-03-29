@@ -1,10 +1,11 @@
 <?php
 
-namespace EonVisualMedia\LaravelKlaviyo\Test;
+namespace EonVisualMedia\LaravelKlaviyo\Test\Unit;
 
 use EonVisualMedia\LaravelKlaviyo\Contracts\ViewedProduct;
 use EonVisualMedia\LaravelKlaviyo\Exceptions\KlaviyoException;
 use EonVisualMedia\LaravelKlaviyo\Klaviyo;
+use EonVisualMedia\LaravelKlaviyo\Test\TestCase;
 use Mockery\MockInterface;
 
 class PushTest extends TestCase

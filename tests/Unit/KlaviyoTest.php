@@ -1,8 +1,9 @@
 <?php
 
-namespace EonVisualMedia\LaravelKlaviyo\Test;
+namespace EonVisualMedia\LaravelKlaviyo\Test\Unit;
 
 use EonVisualMedia\LaravelKlaviyo\Klaviyo;
+use EonVisualMedia\LaravelKlaviyo\Test\TestCase;
 
 class KlaviyoTest extends TestCase
 {

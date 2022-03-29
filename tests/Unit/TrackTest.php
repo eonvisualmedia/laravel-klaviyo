@@ -1,9 +1,10 @@
 <?php
 
-namespace EonVisualMedia\LaravelKlaviyo\Test;
+namespace EonVisualMedia\LaravelKlaviyo\Test\Unit;
 
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoTrack;
 use EonVisualMedia\LaravelKlaviyo\Klaviyo;
+use EonVisualMedia\LaravelKlaviyo\Test\TestCase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
