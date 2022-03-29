@@ -5,6 +5,7 @@ namespace EonVisualMedia\LaravelKlaviyo\Test\Unit;
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoTrack;
 use EonVisualMedia\LaravelKlaviyo\Klaviyo;
 use EonVisualMedia\LaravelKlaviyo\Test\TestCase;
+use EonVisualMedia\LaravelKlaviyo\TrackEvent;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
@@ -24,7 +25,7 @@ class TrackTest extends TestCase
 
         $this->travelTo(now());
 
-        Klaviyo::track('foo');
+        Klaviyo::track(TrackEvent::make('foo'));
 
         Bus::assertDispatched(SendKlaviyoTrack::class, function (SendKlaviyoTrack $job) {
             return $job->getEvent() === 'foo' &&
@@ -40,7 +41,7 @@ class TrackTest extends TestCase
 
         $this->travelTo(now());
 
-        Klaviyo::track('foo', ['foo' => 'bar']);
+        Klaviyo::track(TrackEvent::make('foo', ['foo' => 'bar']));
 
         Http::assertSent(function (Request $request) {
             return $request->method() === 'POST' &&
@@ -58,7 +59,7 @@ class TrackTest extends TestCase
 
         Klaviyo::disable();
 
-        Klaviyo::track('foo');
+        Klaviyo::track(TrackEvent::make('foo'));
 
         Bus::assertNotDispatched(SendKlaviyoTrack::class);
     }

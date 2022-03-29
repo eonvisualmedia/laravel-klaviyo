@@ -3,6 +3,7 @@
 namespace EonVisualMedia\LaravelKlaviyo;
 
 use EonVisualMedia\LaravelKlaviyo\Contracts\KlaviyoIdentity;
+use EonVisualMedia\LaravelKlaviyo\Contracts\TrackEventInterface;
 use EonVisualMedia\LaravelKlaviyo\Contracts\ViewedProduct;
 use EonVisualMedia\LaravelKlaviyo\Exceptions\KlaviyoException;
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoIdentify;
@@ -148,23 +149,20 @@ class KlaviyoClient
     /**
      * Submit a server-side track event to Klaviyo.
      *
-     * @param  string  $event
-     * @param  array|null  $properties
-     * @param  KlaviyoIdentity|string|null  $identity
-     * @param  int|null  $timestamp  Unix timestamp of when the event occurred
+     * @param  TrackEventInterface  $event
      * @return void
      *
      * @throws KlaviyoException
      */
-    public function track(string $event, array $properties = null, KlaviyoIdentity|string $identity = null, int $timestamp = null)
+    public function track(TrackEventInterface $event)
     {
         if (! $this->isEnabled()) {
             return;
         }
 
-        $identity = $this->resolveIdentity($identity);
+        $identity = $this->resolveIdentity($event->getIdentity());
         if ($identity !== null) {
-            dispatch(new SendKlaviyoTrack($event, $properties, $identity, $timestamp));
+            dispatch(new SendKlaviyoTrack($event->getEvent(), $event->getProperties(), $identity, $event->getTimestamp()));
         }
     }
 
