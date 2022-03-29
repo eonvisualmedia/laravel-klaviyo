@@ -6,13 +6,6 @@ use EonVisualMedia\LaravelKlaviyo\Klaviyo;
 
 class EnabledTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        Klaviyo::partialMock()->shouldReceive('getIdentity')->andReturn(['$exchange_id' => 'foo']);
-    }
-
     public function test_is_enabled_is_true()
     {
         $this->assertTrue(Klaviyo::isEnabled());
@@ -36,8 +29,6 @@ class EnabledTest extends TestCase
 
     public function test_config_disabled()
     {
-        $this->refreshApplication();
-
         config(['klaviyo.enabled' => false]);
 
         $this->assertFalse(Klaviyo::isEnabled());
