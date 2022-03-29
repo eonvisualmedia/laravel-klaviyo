@@ -22,15 +22,15 @@ class TrackTest extends TestCase
     {
         Bus::fake();
 
-        $this->freezeTime(function () {
-            Klaviyo::track('foo');
+        $this->travelTo(now());
 
-            Bus::assertDispatched(SendKlaviyoTrack::class, function (SendKlaviyoTrack $job) {
-                return $job->getEvent() === 'foo' &&
-                    $job->getProperties() === null &&
-                    $job->getIdentity() === ['$exchange_id' => 'foo'] &&
-                    $job->getTimestamp() === now()->getTimestamp();
-            });
+        Klaviyo::track('foo');
+
+        Bus::assertDispatched(SendKlaviyoTrack::class, function (SendKlaviyoTrack $job) {
+            return $job->getEvent() === 'foo' &&
+                $job->getProperties() === null &&
+                $job->getIdentity() === ['$exchange_id' => 'foo'] &&
+                $job->getTimestamp() === now()->getTimestamp();
         });
     }
 
@@ -38,17 +38,17 @@ class TrackTest extends TestCase
     {
         Http::fake();
 
-        $this->freezeTime(function () {
-            Klaviyo::track('foo', ['foo' => 'bar']);
+        $this->travelTo(now());
 
-            Http::assertSent(function (Request $request) {
-                return $request->method() === 'POST' &&
-                    $request->url() === 'https://a.klaviyo.com/api/track' &&
-                    $request['event'] === 'foo' &&
-                    $request['customer_properties'] === ['$exchange_id' => 'foo'] &&
-                    $request['time'] === now()->getTimestamp() &&
-                    $request['properties'] === ['foo' => 'bar'];
-            });
+        Klaviyo::track('foo', ['foo' => 'bar']);
+
+        Http::assertSent(function (Request $request) {
+            return $request->method() === 'POST' &&
+                $request->url() === 'https://a.klaviyo.com/api/track' &&
+                $request['event'] === 'foo' &&
+                $request['customer_properties'] === ['$exchange_id' => 'foo'] &&
+                $request['time'] === now()->getTimestamp() &&
+                $request['properties'] === ['foo' => 'bar'];
         });
     }
 
