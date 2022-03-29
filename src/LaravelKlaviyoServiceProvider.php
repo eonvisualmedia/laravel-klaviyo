@@ -3,6 +3,7 @@
 namespace EonVisualMedia\LaravelKlaviyo;
 
 use EonVisualMedia\LaravelKlaviyo\View\Creators\InitializeCreator;
+use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -55,5 +56,9 @@ class LaravelKlaviyoServiceProvider extends ServiceProvider
         });
 
         $this->app->alias(KlaviyoClient::class, 'klaviyo');
+
+        $this->app->resolving(EncryptCookies::class, function (EncryptCookies $middleware) {
+            $middleware->disableFor('__kla_id');
+        });
     }
 }
