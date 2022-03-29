@@ -197,7 +197,7 @@ class KlaviyoClient
     private function resolveIdentity(KlaviyoIdentity|string $identity = null): ?array
     {
         if ($identity === null && $this->isIdentified()) {
-            return ['$exchange_id' => $this->getExchangeId()];
+            return $this->getIdentity();
         }
 
         $identity = $identity ?? Auth::user();
@@ -244,17 +244,23 @@ class KlaviyoClient
      */
     public function isIdentified(): bool
     {
-        return ! empty($this->getExchangeId());
+        return $this->getIdentity() !== null;
     }
 
     /**
      * Retrieve the $exchange_id from cookie.
      *
-     * @return string|null
+     * @return array|null
      */
-    public function getExchangeId(): ?string
+    public function getIdentity(): ?array
     {
-        return Arr::get($this->getDecodedCookie(), '$exchange_id');
+        if (! empty($value = Arr::get($this->getDecodedCookie(), '$exchange_id'))) {
+            return ['$exchange_id' => $value];
+        } elseif (! empty($value = Arr::get($this->getDecodedCookie(), '$email'))) {
+            return ['$email' => $value];
+        } else {
+            return null;
+        }
     }
 
     /**
