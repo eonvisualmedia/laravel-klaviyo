@@ -31,21 +31,6 @@ class SendKlaviyoTrack
         $this->events = $events;
     }
 
-    public function setTimestamp(int $timestamp): static
-    {
-        $this->timestamp = $timestamp;
-
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getTimestamp(): int
-    {
-        return $this->timestamp;
-    }
-
     public function handle(KlaviyoClient $client)
     {
         $http = Http::baseUrl($client->getBaseUri())->async();
