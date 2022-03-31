@@ -152,11 +152,7 @@ class KlaviyoClient
         $events = collect($events)
             ->map(function (TrackEventInterface $event) {
                 $identity = $this->resolveIdentity($event->getIdentity());
-                if ($identity !== null) {
-                    return $event->setIdentity($identity);
-                }
-
-                return null;
+                return $event->setIdentity($identity);
             })
             ->filter();
 
@@ -180,18 +176,16 @@ class KlaviyoClient
         }
 
         $identity = $this->resolveIdentity($identity ?? Auth::user());
-        if ($identity !== null) {
-            dispatch(new SendKlaviyoIdentify($identity));
-        }
+        dispatch(new SendKlaviyoIdentify($identity));
     }
 
     /**
      * @param  KlaviyoIdentity|string|array|null  $identity
-     * @return array|null
+     * @return array
      *
      * @throws KlaviyoException
      */
-    private function resolveIdentity(KlaviyoIdentity|string|array $identity = null): ?array
+    private function resolveIdentity(KlaviyoIdentity|string|array $identity = null): array
     {
         if ($identity === null && $this->isIdentified()) {
             return $this->getIdentity();
