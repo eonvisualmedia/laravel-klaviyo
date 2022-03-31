@@ -130,4 +130,20 @@ class TrackTest extends TestCase
 
         Klaviyo::track(TrackEvent::make('foo'));
     }
+
+    public function test_track_does_not_dispatch_when_no_identity()
+    {
+        $this->setUpMock(null);
+
+        Http::fake();
+
+        Bus::fake();
+
+        $this->expectException(KlaviyoException::class);
+        $this->expectExceptionMessage('Identify requires one of the following fields: $email, $id, $phone_number, $exchange_id');
+
+        Klaviyo::track(TrackEvent::make('foo'));
+
+        Bus::assertNotDispatched(SendKlaviyoTrack::class);
+    }
 }
