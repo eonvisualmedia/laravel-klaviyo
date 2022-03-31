@@ -152,6 +152,7 @@ class KlaviyoClient
         $events = collect($events)
             ->map(function (TrackEventInterface $event) {
                 $identity = $this->resolveIdentity($event->getIdentity());
+
                 return $event->setIdentity($identity);
             })
             ->filter();
