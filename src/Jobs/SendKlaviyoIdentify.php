@@ -5,6 +5,7 @@ namespace EonVisualMedia\LaravelKlaviyo\Jobs;
 use EonVisualMedia\LaravelKlaviyo\KlaviyoClient;
 use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Facades\Http;
 
 class SendKlaviyoIdentify
 {
@@ -18,8 +19,10 @@ class SendKlaviyoIdentify
 
     public function handle(KlaviyoClient $client)
     {
-        $client->request()->post('identify', [
-            'token'      => $client->getPublicKey(),
+        $http = Http::baseUrl($client->getBaseUri());
+
+        $http->post('identify', [
+            'token' => $client->getPublicKey(),
             'properties' => $this->identity,
         ])->throw();
     }

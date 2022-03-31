@@ -7,6 +7,7 @@ use EonVisualMedia\LaravelKlaviyo\Klaviyo;
 use EonVisualMedia\LaravelKlaviyo\Test\TestCase;
 use EonVisualMedia\LaravelKlaviyo\TrackEvent;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
 
@@ -21,17 +22,19 @@ class TrackTest extends TestCase
 
     public function test_track_job_dispatched()
     {
-        Bus::fake();
+        Http::fake();
 
         $this->travelTo(now());
 
         Klaviyo::track(TrackEvent::make('foo'));
 
-        Bus::assertDispatched(SendKlaviyoTrack::class, function (SendKlaviyoTrack $job) {
-            return $job->getEvent() === 'foo' &&
-                $job->getProperties() === null &&
-                $job->getIdentity() === ['$exchange_id' => 'foo'] &&
-                $job->getTimestamp() === now()->getTimestamp();
+        Http::assertSent(function (Request $request) {
+            return $request->method() === 'POST' &&
+                $request->url() === 'https://a.klaviyo.com/api/track' &&
+                Arr::get($request, 'event') === 'foo' &&
+                Arr::get($request, 'customer_properties') === ['$exchange_id' => 'foo'] &&
+                Arr::get($request, 'time') === now()->getTimestamp() &&
+                ! Arr::has($request, 'properties');
         });
     }
 
@@ -62,5 +65,35 @@ class TrackTest extends TestCase
         Klaviyo::track(TrackEvent::make('foo'));
 
         Bus::assertNotDispatched(SendKlaviyoTrack::class);
+    }
+
+    public function test_track_multiple_requests()
+    {
+        Http::fake();
+
+        $this->travelTo(now());
+
+        Klaviyo::track(
+            TrackEvent::make('foo'),
+            TrackEvent::make('foo', ['foo' => 'bar'])
+        );
+
+        Http::assertSent(function (Request $request) {
+            return $request->method() === 'POST' &&
+                $request->url() === 'https://a.klaviyo.com/api/track' &&
+                Arr::get($request, 'event') === 'foo' &&
+                Arr::get($request, 'customer_properties') === ['$exchange_id' => 'foo'] &&
+                Arr::get($request, 'time') === now()->getTimestamp() &&
+                ! Arr::has($request, 'properties');
+        });
+
+        Http::assertSent(function (Request $request) {
+            return $request->method() === 'POST' &&
+                $request->url() === 'https://a.klaviyo.com/api/track' &&
+                Arr::get($request, 'event') === 'foo' &&
+                Arr::get($request, 'customer_properties') === ['$exchange_id' => 'foo'] &&
+                Arr::get($request, 'time') === now()->getTimestamp() &&
+                Arr::get($request, 'properties') === ['foo' => 'bar'];
+        });
     }
 }

@@ -8,12 +8,10 @@ use EonVisualMedia\LaravelKlaviyo\Contracts\ViewedProduct;
 use EonVisualMedia\LaravelKlaviyo\Exceptions\KlaviyoException;
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoIdentify;
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoTrack;
-use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Traits\Macroable;
 
 class KlaviyoClient
@@ -139,30 +137,31 @@ class KlaviyoClient
         $this->enabled = false;
     }
 
-    public function request(): PendingRequest
-    {
-        return Http::withOptions([
-            'base_uri' => $this->baseUri,
-        ]);
-    }
-
     /**
      * Submit a server-side track event to Klaviyo.
      *
-     * @param  TrackEventInterface  $event
+     * @param  TrackEventInterface  ...$events
      * @return void
-     *
-     * @throws KlaviyoException
      */
-    public function track(TrackEventInterface $event)
+    public function track(TrackEventInterface ...$events)
     {
         if (! $this->isEnabled()) {
             return;
         }
 
-        $identity = $this->resolveIdentity($event->getIdentity());
-        if ($identity !== null) {
-            dispatch(new SendKlaviyoTrack($event->getEvent(), $event->getProperties(), $identity, $event->getTimestamp()));
+        $events = collect($events)
+            ->map(function (TrackEventInterface $event) {
+                $identity = $this->resolveIdentity($event->getIdentity());
+                if ($identity !== null) {
+                    return $event->setIdentity($identity);
+                }
+
+                return null;
+            })
+            ->filter();
+
+        if ($events->isNotEmpty()) {
+            dispatch(new SendKlaviyoTrack(...$events->all()));
         }
     }
 
