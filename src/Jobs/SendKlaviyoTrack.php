@@ -7,11 +7,12 @@ use EonVisualMedia\LaravelKlaviyo\Http\Middleware\TrackAndIdentify;
 use EonVisualMedia\LaravelKlaviyo\KlaviyoClient;
 use GuzzleHttp\Promise\EachPromise;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
-class SendKlaviyoTrack
+class SendKlaviyoTrack implements ShouldQueue
 {
     use Dispatchable;
     use Queueable;
@@ -62,4 +63,6 @@ class SendKlaviyoTrack
 
         $promise->wait();
     }
+
+
 }

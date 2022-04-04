@@ -5,10 +5,11 @@ namespace EonVisualMedia\LaravelKlaviyo\Jobs;
 use EonVisualMedia\LaravelKlaviyo\Http\Middleware\TrackAndIdentify;
 use EonVisualMedia\LaravelKlaviyo\KlaviyoClient;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Http;
 
-class SendKlaviyoIdentify
+class SendKlaviyoIdentify implements ShouldQueue
 {
     use Dispatchable;
     use Queueable;
