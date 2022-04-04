@@ -58,9 +58,6 @@ class SendKlaviyoTrack
             'fulfilled' => function (Response $response) {
                 throw_if($response->failed(), $response->toException());
             },
-            'rejected' => function ($exception) {
-                throw $exception;
-            },
         ]))->promise();
 
         $promise->wait();
