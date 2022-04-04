@@ -49,8 +49,7 @@ class SendKlaviyoTrack
                     $payload['properties'] = $event->getProperties();
                 }
 
-                yield $http
-                    ->post('track', $payload);
+                yield $http->post('track', $payload);
             }
         };
 
