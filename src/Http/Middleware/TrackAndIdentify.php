@@ -14,7 +14,7 @@ class TrackAndIdentify
      *
      * @return \Closure
      */
-    public static function middleware()
+    public static function middleware(): \Closure
     {
         return static function (callable $handler): callable {
             return static function (RequestInterface $request, array $options) use ($handler) {

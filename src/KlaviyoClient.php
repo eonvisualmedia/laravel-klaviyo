@@ -5,7 +5,6 @@ namespace EonVisualMedia\LaravelKlaviyo;
 use EonVisualMedia\LaravelKlaviyo\Contracts\KlaviyoIdentity;
 use EonVisualMedia\LaravelKlaviyo\Contracts\TrackEventInterface;
 use EonVisualMedia\LaravelKlaviyo\Contracts\ViewedProduct;
-use EonVisualMedia\LaravelKlaviyo\Exceptions\KlaviyoException;
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoIdentify;
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoTrack;
 use Illuminate\Support\Arr;
@@ -117,7 +116,7 @@ class KlaviyoClient
      *
      * @return bool
      */
-    public function isEnabled()
+    public function isEnabled(): bool
     {
         return $this->enabled;
     }
@@ -169,7 +168,7 @@ class KlaviyoClient
      * @param  KlaviyoIdentity|string|array|null  $identity
      * @return void
      *
-     * @throws KlaviyoException
+     * @throws InvalidArgumentException
      */
     public function identify(KlaviyoIdentity|string|array $identity = null)
     {
@@ -299,7 +298,7 @@ class KlaviyoClient
      * @param  ViewedProduct  $product
      * @return void
      *
-     * @throws KlaviyoException
+     * @throws InvalidArgumentException
      */
     public function pushViewed(ViewedProduct $product)
     {
