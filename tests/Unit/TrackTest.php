@@ -2,7 +2,6 @@
 
 namespace EonVisualMedia\LaravelKlaviyo\Test\Unit;
 
-use EonVisualMedia\LaravelKlaviyo\Exceptions\KlaviyoException;
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoTrack;
 use EonVisualMedia\LaravelKlaviyo\Klaviyo;
 use EonVisualMedia\LaravelKlaviyo\Test\TestCase;
@@ -12,6 +11,7 @@ use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
+use InvalidArgumentException;
 
 class TrackTest extends TestCase
 {
@@ -139,7 +139,7 @@ class TrackTest extends TestCase
 
         Bus::fake();
 
-        $this->expectException(KlaviyoException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Identify requires one of the following fields: $email, $id, $phone_number, $exchange_id');
 
         Klaviyo::track(TrackEvent::make('foo'));

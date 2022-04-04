@@ -3,13 +3,13 @@
 namespace EonVisualMedia\LaravelKlaviyo\Test\Unit;
 
 use EonVisualMedia\LaravelKlaviyo\Contracts\KlaviyoIdentity;
-use EonVisualMedia\LaravelKlaviyo\Exceptions\KlaviyoException;
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoIdentify;
 use EonVisualMedia\LaravelKlaviyo\Klaviyo;
 use EonVisualMedia\LaravelKlaviyo\Test\TestCase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
+use InvalidArgumentException;
 use Mockery\MockInterface;
 
 class IdentifyTest extends TestCase
@@ -38,9 +38,9 @@ class IdentifyTest extends TestCase
             $mock
                 ->shouldReceive('getKlaviyoIdentity')
                 ->andReturn([
-                    '$email'      => 'foo',
+                    '$email' => 'foo',
                     '$first_name' => 'Foo',
-                    '$last_name'  => 'Bar',
+                    '$last_name' => 'Bar',
                 ]);
         });
 
@@ -50,9 +50,9 @@ class IdentifyTest extends TestCase
             return $request->method() === 'POST' &&
                 $request->url() === 'https://a.klaviyo.com/api/identify' &&
                 $request['properties'] === [
-                    '$email'      => 'foo',
+                    '$email' => 'foo',
                     '$first_name' => 'Foo',
-                    '$last_name'  => 'Bar',
+                    '$last_name' => 'Bar',
                 ];
         });
     }
@@ -61,7 +61,7 @@ class IdentifyTest extends TestCase
     {
         Bus::fake();
 
-        $this->expectException(KlaviyoException::class);
+        $this->expectException(InvalidArgumentException::class);
 
         Klaviyo::identify();
 
@@ -72,7 +72,7 @@ class IdentifyTest extends TestCase
     {
         Bus::fake();
 
-        $this->expectException(KlaviyoException::class);
+        $this->expectException(InvalidArgumentException::class);
 
         Klaviyo::identify(['foo' => 'bar']);
 

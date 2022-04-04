@@ -13,6 +13,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Traits\Macroable;
+use InvalidArgumentException;
 
 class KlaviyoClient
 {
@@ -184,7 +185,7 @@ class KlaviyoClient
      * @param  KlaviyoIdentity|string|array|null  $identity
      * @return array
      *
-     * @throws KlaviyoException
+     * @throws InvalidArgumentException
      */
     private function resolveIdentity(KlaviyoIdentity|string|array $identity = null): array
     {
@@ -205,7 +206,7 @@ class KlaviyoClient
         });
 
         if (empty(array_intersect_key($identity ?? [], array_flip($this->identifyAttributes)))) {
-            throw new KlaviyoException(
+            throw new InvalidArgumentException(
                 sprintf(
                     'Identify requires one of the following fields: %s',
                     implode(', ', $this->identifyAttributes)
@@ -263,14 +264,14 @@ class KlaviyoClient
     /**
      * Push an event to be rendered by the client to the beginning of the collection.
      *
-     * @throws KlaviyoException
+     * @throws InvalidArgumentException
      */
     public function prepend(...$values)
     {
         if (count($values) === 0) {
-            throw new KlaviyoException('Not enough arguments for prepend.');
+            throw new InvalidArgumentException('Not enough arguments for prepend.');
         } elseif (count($values) > 3) {
-            throw new KlaviyoException('Too many arguments for prepend.');
+            throw new InvalidArgumentException('Too many arguments for prepend.');
         }
 
         $this->pushCollection->prepend($values);
@@ -279,14 +280,14 @@ class KlaviyoClient
     /**
      * Push an event to be rendered by the client.
      *
-     * @throws KlaviyoException
+     * @throws InvalidArgumentException
      */
     public function push(...$values)
     {
         if (count($values) === 0) {
-            throw new KlaviyoException('Not enough arguments for push.');
+            throw new InvalidArgumentException('Not enough arguments for push.');
         } elseif (count($values) > 3) {
-            throw new KlaviyoException('Too many arguments for push.');
+            throw new InvalidArgumentException('Too many arguments for push.');
         }
 
         $this->pushCollection->push($values);

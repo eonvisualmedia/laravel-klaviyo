@@ -3,30 +3,30 @@
 namespace EonVisualMedia\LaravelKlaviyo\Test\Unit;
 
 use EonVisualMedia\LaravelKlaviyo\Contracts\ViewedProduct;
-use EonVisualMedia\LaravelKlaviyo\Exceptions\KlaviyoException;
 use EonVisualMedia\LaravelKlaviyo\Klaviyo;
 use EonVisualMedia\LaravelKlaviyo\Test\TestCase;
+use InvalidArgumentException;
 use Mockery\MockInterface;
 
 class PushTest extends TestCase
 {
     public function test_prepend_zero_throws()
     {
-        $this->expectException(KlaviyoException::class);
+        $this->expectException(InvalidArgumentException::class);
 
         Klaviyo::prepend();
     }
 
     public function test_prepend_invalid_throws()
     {
-        $this->expectException(KlaviyoException::class);
+        $this->expectException(InvalidArgumentException::class);
 
         Klaviyo::prepend('track', 'event', ['foo' => 'bar'], 'too many arguments');
     }
 
     public function test_push_zero_throws()
     {
-        $this->expectException(KlaviyoException::class);
+        $this->expectException(InvalidArgumentException::class);
 
         Klaviyo::push();
     }
@@ -54,7 +54,7 @@ class PushTest extends TestCase
 
     public function test_push_invalid_throws()
     {
-        $this->expectException(KlaviyoException::class);
+        $this->expectException(InvalidArgumentException::class);
 
         Klaviyo::push('track', 'event', ['foo' => 'bar'], 'too many arguments');
     }
