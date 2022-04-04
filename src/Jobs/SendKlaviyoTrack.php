@@ -63,6 +63,4 @@ class SendKlaviyoTrack implements ShouldQueue
 
         $promise->wait();
     }
-
-
 }
