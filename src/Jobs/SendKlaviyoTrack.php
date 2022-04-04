@@ -3,7 +3,7 @@
 namespace EonVisualMedia\LaravelKlaviyo\Jobs;
 
 use EonVisualMedia\LaravelKlaviyo\Contracts\TrackEventInterface;
-use EonVisualMedia\LaravelKlaviyo\Exceptions\KlaviyoException;
+use EonVisualMedia\LaravelKlaviyo\Http\Middleware\TrackAndIdentify;
 use EonVisualMedia\LaravelKlaviyo\KlaviyoClient;
 use GuzzleHttp\Promise\EachPromise;
 use Illuminate\Bus\Queueable;
@@ -34,7 +34,7 @@ class SendKlaviyoTrack
 
     public function handle(KlaviyoClient $client)
     {
-        $http = Http::baseUrl($client->getBaseUri())->async();
+        $http = Http::baseUrl($client->getBaseUri())->async()->withMiddleware(TrackAndIdentify::middleware());
 
         $requests = function () use ($http, $client) {
             foreach ($this->events as $event) {
@@ -50,19 +50,7 @@ class SendKlaviyoTrack
                 }
 
                 yield $http
-                    ->post('track', $payload)
-                    ->then(function (Response $response) use ($payload) {
-                        if ($response->ok() && $response->body() === '0') {
-                            $message = 'Your data did not decode to valid JSON and was not queued for processing';
-
-                            $data = json_encode($payload);
-                            $message .= ":\n{$data}\n";
-
-                            throw new KlaviyoException($message);
-                        }
-
-                        return $response;
-                    });
+                    ->post('track', $payload);
             }
         };
 

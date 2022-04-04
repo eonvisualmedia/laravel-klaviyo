@@ -113,7 +113,7 @@ class TrackTest extends TestCase
             'track' => Http::response('0', 200),
         ]);
 
-        $this->expectException(KlaviyoException::class);
+        $this->expectException(RequestException::class);
 
         Klaviyo::track(TrackEvent::make('foo'));
     }

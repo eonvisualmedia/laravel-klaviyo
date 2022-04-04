@@ -2,6 +2,7 @@
 
 namespace EonVisualMedia\LaravelKlaviyo\Jobs;
 
+use EonVisualMedia\LaravelKlaviyo\Http\Middleware\TrackAndIdentify;
 use EonVisualMedia\LaravelKlaviyo\KlaviyoClient;
 use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -19,7 +20,7 @@ class SendKlaviyoIdentify
 
     public function handle(KlaviyoClient $client)
     {
-        $http = Http::baseUrl($client->getBaseUri());
+        $http = Http::baseUrl($client->getBaseUri())->withMiddleware(TrackAndIdentify::middleware());
 
         $http->post('identify', [
             'token' => $client->getPublicKey(),
