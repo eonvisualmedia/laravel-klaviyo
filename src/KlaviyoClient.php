@@ -7,16 +7,31 @@ use EonVisualMedia\LaravelKlaviyo\Contracts\TrackEventInterface;
 use EonVisualMedia\LaravelKlaviyo\Contracts\ViewedProduct;
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoIdentify;
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoTrack;
+use GuzzleHttp\Middleware;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\UriInterface;
 
+/**
+ * @method \Illuminate\Http\Client\Response delete(string $url, array $data = [])
+ * @method \Illuminate\Http\Client\Response get(string $url, array|string|null $query = null)
+ * @method \Illuminate\Http\Client\Response head(string $url, array|string|null $query = null)
+ * @method \Illuminate\Http\Client\Response patch(string $url, array $data = [])
+ * @method \Illuminate\Http\Client\Response post(string $url, array $data = [])
+ * @method \Illuminate\Http\Client\Response put(string $url, array $data = [])
+ * @method \Illuminate\Http\Client\Response send(string $method, string $url, array $options = [])
+ **/
 class KlaviyoClient
 {
-    use Macroable;
+    use Macroable {
+        __call as macroCall;
+    }
 
     /**
      * API Endpoint.
@@ -304,5 +319,30 @@ class KlaviyoClient
         $item = $product->getViewedProductProperties();
         $this->push('track', 'Viewed Product', $item);
         $this->push('trackViewedItem', $item);
+    }
+
+    public function __call($method, $parameters)
+    {
+        if (in_array($method, ['delete', 'get', 'head', 'patch', 'post', 'put', 'send'])) {
+            $client = Http::baseUrl($this->getEndpoint())->withMiddleware($this->middleware());
+
+            return $client->{$method}(...$parameters);
+        }
+
+        return $this->macroCall($method, $parameters);
+    }
+
+    private function middleware(): callable
+    {
+        return Middleware::mapRequest(function (
+            RequestInterface $request
+        ) {
+            return $request->withUri(with($request->getUri(), function (UriInterface $uri) {
+                parse_str($uri->getQuery(), $query);
+                return $uri->withQuery(http_build_query(array_merge($query, [
+                    'api_key' => $this->getPrivateKey(),
+                ])));
+            }));
+        });
     }
 }
