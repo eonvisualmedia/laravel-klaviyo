@@ -19,21 +19,21 @@ class KlaviyoClient
     use Macroable;
 
     /**
-     * API Endpoint
+     * API Endpoint.
      *
      * @var string
      */
     protected string $endpoint;
 
     /**
-     * Private API Key
+     * Private API Key.
      *
      * @var string|mixed
      */
     protected string $privateKey;
 
     /**
-     * Public API Key
+     * Public API Key.
      *
      * @var string|mixed
      */
