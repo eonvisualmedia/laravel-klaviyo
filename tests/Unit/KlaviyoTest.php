@@ -7,18 +7,20 @@ use EonVisualMedia\LaravelKlaviyo\Test\TestCase;
 
 class KlaviyoTest extends TestCase
 {
-    public function test_set_base_uri()
+    public function test_config_endpoint()
     {
-        Klaviyo::setBaseUri('foo');
+        config([
+            'klaviyo.endpoint' => 'foo',
+        ]);
 
-        $this->assertEquals('foo', Klaviyo::getBaseUri());
+        $this->assertEquals('foo', Klaviyo::getEndpoint());
     }
 
     public function test_get_keys()
     {
         config([
             'klaviyo.private_api_key' => 'foo',
-            'klaviyo.public_api_key'  => 'bar',
+            'klaviyo.public_api_key' => 'bar',
         ]);
 
         $this->assertEquals('foo', Klaviyo::getPrivateKey());

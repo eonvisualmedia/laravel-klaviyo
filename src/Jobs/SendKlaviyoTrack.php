@@ -35,7 +35,7 @@ class SendKlaviyoTrack implements ShouldQueue
 
     public function handle(KlaviyoClient $client)
     {
-        $http = Http::baseUrl($client->getBaseUri())->async()->withMiddleware(TrackAndIdentify::middleware());
+        $http = Http::baseUrl($client->getEndpoint())->async()->withMiddleware(TrackAndIdentify::middleware());
 
         $requests = function () use ($http, $client) {
             foreach ($this->events as $event) {

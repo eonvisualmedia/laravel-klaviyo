@@ -18,14 +18,33 @@ class KlaviyoClient
 {
     use Macroable;
 
-    protected string $baseUri = 'https://a.klaviyo.com/api/';
+    /**
+     * API Endpoint
+     *
+     * @var string
+     */
+    protected string $endpoint;
+
+    /**
+     * Private API Key
+     *
+     * @var string|mixed
+     */
+    protected string $privateKey;
+
+    /**
+     * Public API Key
+     *
+     * @var string|mixed
+     */
+    protected string $publicKey;
 
     /**
      * The key for the identity.
      *
      * @var string
      */
-    protected string $identityKeyName = '$email';
+    protected string $identityKeyName;
 
     /**
      * Attributes used for the identification of an Identify Profile.
@@ -46,32 +65,23 @@ class KlaviyoClient
      */
     protected bool $enabled = true;
 
-    /**
-     * @param  string  $privateKey
-     * @param  string  $publicKey
-     */
-    public function __construct(protected string $privateKey, protected string $publicKey)
+    public function __construct(array $config)
     {
+        $this->endpoint = $config['endpoint'] ?? '';
+        $this->privateKey = $config['private_api_key'] ?? '';
+        $this->publicKey = $config['public_api_key'] ?? '';
+        $this->identityKeyName = $config['identity_key_name'] ?? '$email';
+        $this->enabled = $config['enabled'] ?? true;
+
         $this->pushCollection = new Collection();
     }
 
     /**
      * @return string
      */
-    public function getBaseUri(): string
+    public function getEndpoint(): string
     {
-        return $this->baseUri;
-    }
-
-    /**
-     * @param  string  $baseUri
-     * @return KlaviyoClient
-     */
-    public function setBaseUri(string $baseUri): KlaviyoClient
-    {
-        $this->baseUri = $baseUri;
-
-        return $this;
+        return $this->endpoint;
     }
 
     /**
@@ -98,17 +108,6 @@ class KlaviyoClient
     public function getIdentityKeyName(): string
     {
         return $this->identityKeyName;
-    }
-
-    /**
-     * @param  string  $identityKeyName
-     * @return KlaviyoClient
-     */
-    public function setIdentityKeyName(string $identityKeyName): KlaviyoClient
-    {
-        $this->identityKeyName = $identityKeyName;
-
-        return $this;
     }
 
     /**

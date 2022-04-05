@@ -21,7 +21,7 @@ class SendKlaviyoIdentify implements ShouldQueue
 
     public function handle(KlaviyoClient $client)
     {
-        $http = Http::baseUrl($client->getBaseUri())->withMiddleware(TrackAndIdentify::middleware());
+        $http = Http::baseUrl($client->getEndpoint())->withMiddleware(TrackAndIdentify::middleware());
 
         $http->post('identify', [
             'token' => $client->getPublicKey(),

@@ -8,10 +8,12 @@ return [
      */
     'enabled' => (bool) env('KLAVIYO_ENABLED', true),
 
+    'endpoint' => env('KLAVIYO_ENDPOINT', 'https://a.klaviyo.com/api/'),
+
     /**
      * The queue on which jobs will be processed.
      */
-    'queue'   => env('KLAVIYO_QUEUE', 'klaviyo'),
+    'queue' => env('KLAVIYO_QUEUE', 'klaviyo'),
 
     'private_api_key' => env('KLAVIYO_PRIVATE_API_KEY', ''),
 
