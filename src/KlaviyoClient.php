@@ -339,6 +339,7 @@ class KlaviyoClient
         ) {
             return $request->withUri(with($request->getUri(), function (UriInterface $uri) {
                 parse_str($uri->getQuery(), $query);
+
                 return $uri->withQuery(http_build_query(array_merge($query, [
                     'api_key' => $this->getPrivateKey(),
                 ])));
