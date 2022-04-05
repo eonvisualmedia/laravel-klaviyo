@@ -332,6 +332,11 @@ class KlaviyoClient
         return $this->macroCall($method, $parameters);
     }
 
+    /**
+     * GuzzleHttp Middleware that injects the private api key.
+     *
+     * @return callable
+     */
     private function middleware(): callable
     {
         return Middleware::mapRequest(function (
