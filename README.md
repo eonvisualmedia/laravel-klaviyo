@@ -136,7 +136,7 @@ public function boot()
                 'Fulfilled Order',
                 $transaction->toKlaviyo(),
                 $transaction->user,
-                $transaction->created_at->getTimestamp()
+                $transaction->created_at
             ));
         }
     );
