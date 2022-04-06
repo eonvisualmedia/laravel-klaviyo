@@ -43,7 +43,7 @@ class SendKlaviyoTrack implements ShouldQueue
                     'token' => $client->getPublicKey(),
                     'event' => $event->getEvent(),
                     'customer_properties' => $event->getIdentity(),
-                    'time' => $event->getTimestamp() ?? $this->timestamp,
+                    'time' => $event->getTimestamp()?->getTimestamp() ?? $this->timestamp,
                 ];
 
                 if (null !== $event->getProperties()) {

@@ -2,6 +2,8 @@
 
 namespace EonVisualMedia\LaravelKlaviyo\Contracts;
 
+use Illuminate\Support\Carbon;
+
 interface TrackEventInterface
 {
     public function getEvent(): string;
@@ -16,7 +18,7 @@ interface TrackEventInterface
 
     public function setIdentity(KlaviyoIdentity|string|array|null $identity): TrackEventInterface;
 
-    public function getTimestamp(): int|null;
+    public function getTimestamp(): Carbon|null;
 
-    public function setTimestamp(int|null $timestamp): TrackEventInterface;
+    public function setTimestamp(Carbon|null $timestamp): TrackEventInterface;
 }

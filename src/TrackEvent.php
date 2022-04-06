@@ -4,16 +4,21 @@ namespace EonVisualMedia\LaravelKlaviyo;
 
 use EonVisualMedia\LaravelKlaviyo\Contracts\KlaviyoIdentity;
 use EonVisualMedia\LaravelKlaviyo\Contracts\TrackEventInterface;
+use Illuminate\Support\Carbon;
 
 class TrackEvent implements TrackEventInterface
 {
     protected string $event;
     protected array|null $properties;
     protected string|KlaviyoIdentity|array|null $identity;
-    protected int|null $timestamp;
+    protected Carbon|null $timestamp;
 
-    public static function make(string $event, array $properties = null, KlaviyoIdentity|string|array $identity = null, int $timestamp = null): TrackEvent
-    {
+    public static function make(
+        string $event,
+        array $properties = null,
+        KlaviyoIdentity|string|array $identity = null,
+        Carbon $timestamp = null
+    ): TrackEvent {
         return (new static())
             ->setEvent($event)
             ->setProperties($properties)
@@ -79,18 +84,18 @@ class TrackEvent implements TrackEventInterface
     }
 
     /**
-     * @return int|null
+     * @return Carbon|null
      */
-    public function getTimestamp(): int|null
+    public function getTimestamp(): Carbon|null
     {
         return $this->timestamp;
     }
 
     /**
-     * @param  int|null  $timestamp
+     * @param  Carbon|null  $timestamp
      * @return TrackEvent
      */
-    public function setTimestamp(int $timestamp = null): TrackEvent
+    public function setTimestamp(Carbon $timestamp = null): TrackEvent
     {
         $this->timestamp = $timestamp;
 
