@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Illuminate\Http\Client\Response post(string $url, array $data = [])
  * @method static \Illuminate\Http\Client\Response put(string $url, array $data = [])
  * @method static \Illuminate\Http\Client\Response send(string $method, string $url, array $options = [])
+ * @method static \Illuminate\Http\Client\PendingRequest async(bool $async = true)
+ * @method static array pool(callable $callback)
  */
 class Klaviyo extends Facade
 {

@@ -13,8 +13,9 @@ class IdentityTest extends TestCase
                 '$exchange_id' => 'foo',
             ])
             ->get('identity')
+            ->assertOk()
             ->assertExactJson([
-                '$exchange_id' => 'foo',
+                '_kx' => 'foo',
             ]);
     }
 
@@ -25,8 +26,9 @@ class IdentityTest extends TestCase
                 '$email' => 'foo@bar',
             ])
             ->get('identity')
+            ->assertOk()
             ->assertExactJson([
-                '$email' => 'foo@bar',
+                'email' => 'foo@bar',
             ]);
     }
 

@@ -3,11 +3,9 @@
 namespace EonVisualMedia\LaravelKlaviyo;
 
 use EonVisualMedia\LaravelKlaviyo\Contracts\KlaviyoIdentity;
-use EonVisualMedia\LaravelKlaviyo\Contracts\TrackEventInterface;
 use EonVisualMedia\LaravelKlaviyo\Contracts\ViewedProduct;
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoIdentify;
 use EonVisualMedia\LaravelKlaviyo\Jobs\SendKlaviyoTrack;
-use GuzzleHttp\Middleware;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -15,8 +13,6 @@ use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\UriInterface;
 
 /**
  * @method \Illuminate\Http\Client\Response delete(string $url, array $data = [])
@@ -26,6 +22,8 @@ use Psr\Http\Message\UriInterface;
  * @method \Illuminate\Http\Client\Response post(string $url, array $data = [])
  * @method \Illuminate\Http\Client\Response put(string $url, array $data = [])
  * @method \Illuminate\Http\Client\Response send(string $method, string $url, array $options = [])
+ * @method \Illuminate\Http\Client\PendingRequest async(bool $async = true)
+ * @method array pool(callable $callback)
  **/
 class KlaviyoClient
 {
@@ -55,6 +53,13 @@ class KlaviyoClient
     protected string $publicKey;
 
     /**
+     * Klaviyo API revision to use.
+     *
+     * @var string|mixed
+     */
+    protected string $apiVersion;
+
+    /**
      * The key for the identity.
      *
      * @var string
@@ -67,10 +72,10 @@ class KlaviyoClient
      * @var string[]
      */
     protected array $identifyAttributes = [
-        '$email',
-        '$id',
-        '$phone_number',
-        '$exchange_id',
+        'email',
+        'id',
+        'phone_number',
+        '_kx',
     ];
 
     protected Collection $pushCollection;
@@ -80,13 +85,23 @@ class KlaviyoClient
      */
     protected bool $enabled = true;
 
+    protected \Illuminate\Http\Client\PendingRequest $client;
+
     public function __construct(array $config)
     {
         $this->endpoint = $config['endpoint'] ?? '';
-        $this->privateKey = $config['private_api_key'] ?? '';
-        $this->publicKey = $config['public_api_key'] ?? '';
-        $this->identityKeyName = $config['identity_key_name'] ?? '$email';
+        $this->privateKey = $config['private_api_key'] ?: throw new InvalidArgumentException('Invalid private api key');
+        $this->publicKey = $config['public_api_key'] ?: throw new InvalidArgumentException('Invalid public api key');
+        $this->apiVersion = $config['api_version'] ?: throw new InvalidArgumentException('Invalid API Version');
+        $this->identityKeyName = $config['identity_key_name'] ?: throw new InvalidArgumentException('Invalid default identity key name');
         $this->enabled = $config['enabled'] ?? true;
+        $this->client = Http::baseUrl($this->getEndpoint())
+            ->acceptJson()
+            ->asJson()
+            ->withToken($this->privateKey, 'Klaviyo-API-Key')
+            ->withHeaders([
+                'revision' => $this->getApiVersion()
+            ]);
 
         $this->pushCollection = new Collection();
     }
@@ -113,6 +128,14 @@ class KlaviyoClient
     public function getPublicKey(): string
     {
         return $this->publicKey;
+    }
+
+    /**
+     * @return string
+     */
+    public function getApiVersion(): string
+    {
+        return $this->apiVersion;
     }
 
     /**
@@ -154,22 +177,17 @@ class KlaviyoClient
     /**
      * Submit a server-side track event to Klaviyo.
      *
-     * @param  TrackEventInterface  ...$events
+     * @param TrackEvent ...$events
      * @return void
      */
-    public function track(TrackEventInterface ...$events)
+    public function track(TrackEvent ...$events)
     {
         if (! $this->isEnabled()) {
             return;
         }
 
         $events = collect($events)
-            ->map(function (TrackEventInterface $event) {
-                $identity = $this->resolveIdentity($event->getIdentity());
-
-                return $event->setIdentity($identity);
-            })
-            ->filter();
+            ->reject(fn($event) => empty($event->identity));
 
         if ($events->isNotEmpty()) {
             dispatch(new SendKlaviyoTrack(...$events->all()));
@@ -179,7 +197,7 @@ class KlaviyoClient
     /**
      * Submit a server-side identify event to Klaviyo.
      *
-     * @param  KlaviyoIdentity|string|array|null  $identity
+     * @param KlaviyoIdentity|string|array|null $identity
      * @return void
      *
      * @throws InvalidArgumentException
@@ -195,12 +213,11 @@ class KlaviyoClient
     }
 
     /**
-     * @param  KlaviyoIdentity|string|array|null  $identity
-     * @return array
+     * Resolve identity or profile of user
      *
      * @throws InvalidArgumentException
      */
-    private function resolveIdentity(KlaviyoIdentity|string|array $identity = null): array
+    public function resolveIdentity(KlaviyoIdentity|string|array|null $identity = null): ?array
     {
         if ($identity === null && $this->isIdentified()) {
             return $this->getIdentity();
@@ -258,9 +275,9 @@ class KlaviyoClient
     public function getIdentity(): ?array
     {
         if (! empty($value = Arr::get($this->getDecodedCookie(), '$exchange_id'))) {
-            return ['$exchange_id' => $value];
+            return ['_kx' => $value];
         } elseif (! empty($value = Arr::get($this->getDecodedCookie(), '$email'))) {
-            return ['$email' => $value];
+            return ['email' => $value];
         } else {
             return null;
         }
@@ -309,7 +326,7 @@ class KlaviyoClient
     /**
      * Push a viewed product event to be rendered by the client.
      *
-     * @param  ViewedProduct  $product
+     * @param ViewedProduct $product
      * @return void
      *
      * @throws InvalidArgumentException
@@ -323,32 +340,10 @@ class KlaviyoClient
 
     public function __call($method, $parameters)
     {
-        if (in_array($method, ['delete', 'get', 'head', 'patch', 'post', 'put', 'send'])) {
-            $client = Http::baseUrl($this->getEndpoint())->withMiddleware($this->middleware());
-
-            return $client->{$method}(...$parameters);
+        if (in_array($method, ['delete', 'get', 'head', 'patch', 'post', 'put', 'send', 'async', 'pool'])) {
+            return $this->client->{$method}(...$parameters);
         }
 
         return $this->macroCall($method, $parameters);
-    }
-
-    /**
-     * GuzzleHttp Middleware that injects the private api key.
-     *
-     * @return callable
-     */
-    private function middleware(): callable
-    {
-        return Middleware::mapRequest(function (
-            RequestInterface $request
-        ) {
-            return $request->withUri(with($request->getUri(), function (UriInterface $uri) {
-                parse_str($uri->getQuery(), $query);
-
-                return $uri->withQuery(http_build_query(array_merge($query, [
-                    'api_key' => $this->getPrivateKey(),
-                ])));
-            }));
-        });
     }
 }

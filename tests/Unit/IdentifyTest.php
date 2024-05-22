@@ -27,8 +27,13 @@ class IdentifyTest extends TestCase
 
         Http::assertSent(function (Request $request) {
             return $request->method() === 'POST' &&
-                $request->url() === 'https://a.klaviyo.com/api/identify' &&
-                $request['properties'] === ['$email' => 'foo'];
+                $request->url() === 'https://a.klaviyo.com/api/profiles' &&
+                $request->data() === ['data' => [
+                    'type'       => 'profile',
+                    'attributes' => [
+                        'email' => 'foo'
+                    ]
+                ]];
         });
     }
 
@@ -38,9 +43,9 @@ class IdentifyTest extends TestCase
             $mock
                 ->shouldReceive('getKlaviyoIdentity')
                 ->andReturn([
-                    '$email' => 'foo',
-                    '$first_name' => 'Foo',
-                    '$last_name' => 'Bar',
+                    'email'      => 'foo',
+                    'first_name' => 'Foo',
+                    'last_name'  => 'Bar',
                 ]);
         });
 
@@ -48,11 +53,16 @@ class IdentifyTest extends TestCase
 
         Http::assertSent(function (Request $request) {
             return $request->method() === 'POST' &&
-                $request->url() === 'https://a.klaviyo.com/api/identify' &&
-                $request['properties'] === [
-                    '$email' => 'foo',
-                    '$first_name' => 'Foo',
-                    '$last_name' => 'Bar',
+                $request->url() === 'https://a.klaviyo.com/api/profiles' &&
+                $request->data() === [
+                    'data' => [
+                        'type'       => 'profile',
+                        'attributes' => [
+                            'email'      => 'foo',
+                            'first_name' => 'Foo',
+                            'last_name'  => 'Bar',
+                        ]
+                    ]
                 ];
         });
     }
