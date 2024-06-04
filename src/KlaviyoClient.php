@@ -11,6 +11,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Traits\ForwardsCalls;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
 
@@ -27,7 +28,7 @@ use InvalidArgumentException;
  **/
 class KlaviyoClient
 {
-    use Macroable {
+    use ForwardsCalls, Macroable {
         __call as macroCall;
     }
 
@@ -340,10 +341,10 @@ class KlaviyoClient
 
     public function __call($method, $parameters)
     {
-        if (in_array($method, ['delete', 'get', 'head', 'patch', 'post', 'put', 'send', 'async', 'pool'])) {
-            return $this->client->{$method}(...$parameters);
+        if (static::hasMacro($method)) {
+            return $this->macroCall($method, $parameters);
         }
 
-        return $this->macroCall($method, $parameters);
+        return $this->forwardCallTo($this->client, $method, $parameters);
     }
 }
