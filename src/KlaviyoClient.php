@@ -33,6 +33,24 @@ class KlaviyoClient
     }
 
     /**
+     * @see https://developers.klaviyo.com/en/reference/create_profile
+     */
+    const SERVER_PROFILE_ATTRIBUTES = [
+        'email',
+        'phone_number',
+        'external_id',
+        'anonymous_id',
+        '_kx',
+        'first_name',
+        'last_name',
+        'organization',
+        'title',
+        'image',
+        'location',
+        'properties',
+    ];
+
+    /**
      * API Endpoint.
      *
      * @var string
@@ -348,5 +366,19 @@ class KlaviyoClient
         }
 
         return $this->forwardCallTo($this->client(), $method, $parameters);
+    }
+
+    /**
+     * Client and server api have different payloads; move unknown attributes to custom properties array
+     *
+     * @param array $attributes
+     * @return array
+     */
+    public function clientProfileToServerProfile(array $attributes): array
+    {
+        return collect(Arr::dot($attributes))
+            ->keyBy(fn($item, $key) => in_array(explode('.', $key)[0], self::SERVER_PROFILE_ATTRIBUTES) ? $key : "properties.{$key}")
+            ->undot()
+            ->all();
     }
 }

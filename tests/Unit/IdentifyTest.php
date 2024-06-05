@@ -46,6 +46,10 @@ class IdentifyTest extends TestCase
                     'email'      => 'foo',
                     'first_name' => 'Foo',
                     'last_name'  => 'Bar',
+                    'custom_123' => 'Baz',
+                    'properties' => [
+                        'foo' => 'bar'
+                    ]
                 ]);
         });
 
@@ -61,6 +65,10 @@ class IdentifyTest extends TestCase
                             'email'      => 'foo',
                             'first_name' => 'Foo',
                             'last_name'  => 'Bar',
+                            'properties' => [
+                                'custom_123' => 'Baz',
+                                'foo'        => 'bar',
+                            ]
                         ]
                     ]
                 ];

@@ -33,36 +33,13 @@ class SendKlaviyoTrack implements ShouldQueue
         $requests = function (Pool $pool) use ($client) {
             foreach ($this->events as $event) {
                 yield $pool
+                    ->acceptJson()
+                    ->asJson()
                     ->withToken($client->getPrivateKey(), 'Klaviyo-API-Key')
                     ->withHeaders([
                         'revision' => $client->getApiVersion()
                     ])
-                    ->post($client->getEndpoint() . 'events', [
-                        'data' => [
-                            'type'       => 'event',
-                            'attributes' => [
-                                'properties'     => $event->properties,
-                                'time'           => $event->time->toIso8601String(),
-                                'value'          => 0,
-                                'value_currency' => 'GBP',
-                                'unique_id'      => $this->job->uuid(),
-                                'metric'         => [
-                                    'data' => [
-                                        'type'       => 'metric',
-                                        'attributes' => [
-                                            'name' => $event->metric_name,
-                                        ]
-                                    ]
-                                ],
-                                'profile'        => [
-                                    'data' => [
-                                        'type'       => 'profile',
-                                        'attributes' => $event->identity
-                                    ],
-                                ],
-                            ],
-                        ]
-                    ]);
+                    ->post($client->getEndpoint().'events', $this->toPayload($event));
             }
         };
 
@@ -73,5 +50,17 @@ class SendKlaviyoTrack implements ShouldQueue
         foreach ($responses as $response) {
             $response->throw();
         }
+    }
+
+    protected function toPayload(TrackEvent $event): array
+    {
+        return [
+            'data' => [
+                'type'       => 'event',
+                'attributes' => array_merge([
+                    'unique_id' => $this->job->uuid(),
+                ], $event->toPayload()),
+            ]
+        ];
     }
 }

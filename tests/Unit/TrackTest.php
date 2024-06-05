@@ -47,7 +47,7 @@ class TrackTest extends TestCase
 
         $this->travelTo(now());
 
-        Klaviyo::track(TrackEvent::make('foo', ['foo' => 'bar']));
+        Klaviyo::track(TrackEvent::make('foo', ['properties' => ['foo' => 'bar']]));
 
         Http::assertSent(function (Request $request) {
             return $request->method() === 'POST' &&
@@ -82,7 +82,7 @@ class TrackTest extends TestCase
 
         Klaviyo::track(
             TrackEvent::make('foo'),
-            TrackEvent::make('foo', ['foo' => 'bar'])
+            TrackEvent::make('foo', ['properties' => ['foo' => 'bar']]),
         );
 
         Http::assertSent(function (Request $request) {

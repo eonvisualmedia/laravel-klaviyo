@@ -4,9 +4,6 @@ namespace EonVisualMedia\LaravelKlaviyo;
 
 use EonVisualMedia\LaravelKlaviyo\Contracts\KlaviyoIdentity;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cookie;
-use InvalidArgumentException;
 
 class TrackEvent
 {
@@ -15,7 +12,7 @@ class TrackEvent
 
     public function __construct(
         public string                $metric_name,
-        public array                 $properties = [],
+        public array                 $payload = [],
         KlaviyoIdentity|string|array $identity = null,
         Carbon                       $time = null
     )
@@ -24,17 +21,35 @@ class TrackEvent
         $this->time = $time ?? Carbon::now();
     }
 
-    /**
-     * @deprecated 2.0.0
-     * @see __construct
-     */
     public static function make(
         string                       $metric_name,
-        array                        $properties = [],
+        array                        $payload = [],
         KlaviyoIdentity|string|array $identity = null,
         Carbon                       $timestamp = null
     ): TrackEvent
     {
-        return new static($metric_name, $properties, $identity, $timestamp);
+        return new static($metric_name, $payload, $identity, $timestamp);
+    }
+
+    public function toPayload(): array
+    {
+        return array_merge_recursive([
+            'properties' => [],
+            'time'       => $this->time->toIso8601String(),
+            'metric'     => [
+                'data' => [
+                    'type'       => 'metric',
+                    'attributes' => [
+                        'name' => $this->metric_name,
+                    ]
+                ]
+            ],
+            'profile'    => [
+                'data' => [
+                    'type'       => 'profile',
+                    'attributes' => Klaviyo::clientProfileToServerProfile($this->identity)
+                ],
+            ],
+        ], $this->payload);
     }
 }

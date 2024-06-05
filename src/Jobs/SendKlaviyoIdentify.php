@@ -23,7 +23,7 @@ class SendKlaviyoIdentify implements ShouldQueue
             ->post('profile-import', [
                 'data' => [
                     'type'       => 'profile',
-                    'attributes' => $this->attributes
+                    'attributes' => $client->clientProfileToServerProfile($this->attributes)
                 ]
             ])
             ->throw();

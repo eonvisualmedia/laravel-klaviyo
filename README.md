@@ -4,13 +4,9 @@ This package assists with interacting with Klaviyo to track client and server-si
 
 ## Requirements
 
-For server-side track, identify or REST api calls this package utilises the Laravel HTTP Client, therefore if required you should install `guzzlehttp/guzzle` via Composer:
+For server-side track, identify or REST api calls this package utilises the Laravel HTTP Client.
 
-```bash
-composer require guzzlehttp/guzzle
-```
-
-Additionally, server-side events are queued you should configure a queue worker to process jobs which by default are on the `klaviyo` queue.
+Server-side events should be processed in the background, by default jobs are placed on the `klaviyo` queue.
 
 ## Installation
 
@@ -63,16 +59,16 @@ Alternatively the identify method may be called explicitly, for instance after u
 
 ```php
 Klaviyo::identify([
-    '$email' => 'foo@example.com',
-    '$first_name' => 'Foo',
-    '$last_name' => 'Bar'
+    'email' => 'foo@example.com',
+    'first_name' => 'Foo',
+    'last_name' => 'Bar'
 ]);
 ```
 
 #### Track events client-side
 
 ```php
-Klaviyo::push('track', 'Added to Cart' [
+Klaviyo::push('track', 'Added to Cart', [
     '$value' => 100,
     'AddedTitle' => 'Widget A'
 ]);
@@ -86,8 +82,8 @@ To queue server-side events.
 Klaviyo::track(TrackEvent::make(
     'Placed Order',
     [
-        '$event_id' => '1234_WINNIEPOOH',
-        '$value' => 9.99,
+        'unique_id' => '1234_WINNIEPOOH',
+        'value' => 9.99,
     ]
 ));
 ```
@@ -99,13 +95,13 @@ is an instance of `EonVisualMedia\LaravelKlaviyo\Contracts\KlaviyoIdentity`.
 Klaviyo::track(TrackEvent::make(
     'Placed Order',
     [
-         '$event_id' => '1234_WINNIEPOOH',
-         '$value' => 9.99,
+         'unique_id' => '1234_WINNIEPOOH',
+         'value' => 9.99,
     ],
     [
-        '$email' => 'foo@example.com',
-        '$first_name' => 'Foo',
-        '$last_name' => 'Bar'
+        'email' => 'foo@example.com',
+        'first_name' => 'Foo',
+        'last_name' => 'Bar',
     ],
     now()->addWeeks(-1)
 ));
@@ -151,18 +147,67 @@ Klaviyo::fulfilled_order($transaction);
 
 #### REST
 
-You may interact with the Klaviyo REST api using the Laravel HTTP Client, helper methods exposed on this package append the `api_key=PRIVATE_API_KEY` to requests.
+You may interact with the Klaviyo REST api using the Laravel HTTP Client, calls forwarded via KlaviyoClient append a `Authorization: Klaviyo-API-Key your-private-api-key` header to requests.
 
 ```php
-Klaviyo::delete('v2/list/{list_id}/subscribe', [
-    'emails' => ['foo@example.com']
+Klaviyo::get('lists');
+
+Klaviyo::post("profile-subscription-bulk-create-jobs", [
+    'data' => [
+        'type'          => 'profile-subscription-bulk-create-job',
+        'attributes'    => [
+            'profiles' => [
+                'data' => [
+                    [
+                        'type'       => 'profile',
+                        'attributes' => [
+                            'email'         => 'foo@example.com',
+                            'subscriptions' => [
+                                'email' => [
+                                    'marketing' => [
+                                        'consent' => 'SUBSCRIBED'
+                                    ]
+                                ],
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ],
+        'relationships' => [
+            'list' => [
+                'data' => [
+                    'type' => 'list',
+                    'id'   => $list_id
+                ]
+            ]
+        ]
+    ]
 ]);
 
-Klaviyo::get('v2/lists');
-
-Klaviyo::post('v2/list/{list_id}/subscribe', [
-    'profiles' => [
-        ['email' => 'foo@example.com']
+Klaviyo::delete("profile-subscription-bulk-delete-jobs", [
+    'data' => [
+        'type'          => 'profile-subscription-bulk-delete-job',
+        'attributes'    => [
+            'profiles' => [
+                'data' => [
+                    [
+                        'type'       => 'profile',
+                        'attributes' => [
+                            'email' => 'foo@example.com',
+                        ]
+                    ]
+                ]
+            ]
+        ],
+        'relationships' => [
+            'list' => [
+                'data' => [
+                    'type' => 'list',
+                    'id'   => $list_id
+                ]
+            ]
+        ]
     ]
 ]);
 ```
