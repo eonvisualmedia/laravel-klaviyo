@@ -86,8 +86,6 @@ class KlaviyoClient
      */
     protected bool $enabled = true;
 
-    protected \Illuminate\Http\Client\PendingRequest $client;
-
     public function __construct(array $config)
     {
         $this->endpoint = $config['endpoint'] ?? '';
@@ -96,13 +94,6 @@ class KlaviyoClient
         $this->apiVersion = $config['api_version'] ?: throw new InvalidArgumentException('Invalid API Version');
         $this->identityKeyName = $config['identity_key_name'] ?: throw new InvalidArgumentException('Invalid default identity key name');
         $this->enabled = $config['enabled'] ?? true;
-        $this->client = Http::baseUrl($this->getEndpoint())
-            ->acceptJson()
-            ->asJson()
-            ->withToken($this->privateKey, 'Klaviyo-API-Key')
-            ->withHeaders([
-                'revision' => $this->getApiVersion()
-            ]);
 
         $this->pushCollection = new Collection();
     }
@@ -339,12 +330,23 @@ class KlaviyoClient
         $this->push('trackViewedItem', $item);
     }
 
+    protected function client(): \Illuminate\Http\Client\PendingRequest
+    {
+        return Http::baseUrl($this->getEndpoint())
+            ->acceptJson()
+            ->asJson()
+            ->withToken($this->privateKey, 'Klaviyo-API-Key')
+            ->withHeaders([
+                'revision' => $this->getApiVersion()
+            ]);
+    }
+
     public function __call($method, $parameters)
     {
         if (static::hasMacro($method)) {
             return $this->macroCall($method, $parameters);
         }
 
-        return $this->forwardCallTo($this->client, $method, $parameters);
+        return $this->forwardCallTo($this->client(), $method, $parameters);
     }
 }
