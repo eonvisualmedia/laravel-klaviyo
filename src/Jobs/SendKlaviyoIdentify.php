@@ -20,7 +20,7 @@ class SendKlaviyoIdentify implements ShouldQueue
     public function handle(KlaviyoClient $client)
     {
         $client
-            ->post('profiles', [
+            ->post('profile-import', [
                 'data' => [
                     'type'       => 'profile',
                     'attributes' => $this->attributes
