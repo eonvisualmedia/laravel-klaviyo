@@ -27,7 +27,7 @@ class IdentifyTest extends TestCase
 
         Http::assertSent(function (Request $request) {
             return $request->method() === 'POST' &&
-                $request->url() === 'https://a.klaviyo.com/api/profiles' &&
+                $request->url() === 'https://a.klaviyo.com/api/profile-import' &&
                 $request->data() === ['data' => [
                     'type'       => 'profile',
                     'attributes' => [
@@ -53,7 +53,7 @@ class IdentifyTest extends TestCase
 
         Http::assertSent(function (Request $request) {
             return $request->method() === 'POST' &&
-                $request->url() === 'https://a.klaviyo.com/api/profiles' &&
+                $request->url() === 'https://a.klaviyo.com/api/profile-import' &&
                 $request->data() === [
                     'data' => [
                         'type'       => 'profile',
