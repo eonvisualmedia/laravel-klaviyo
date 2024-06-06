@@ -4,9 +4,11 @@ namespace EonVisualMedia\LaravelKlaviyo;
 
 use EonVisualMedia\LaravelKlaviyo\Contracts\KlaviyoIdentity;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class TrackEvent
 {
+    public string $id;
     public array $identity;
     public Carbon $time;
 
@@ -17,6 +19,7 @@ class TrackEvent
         Carbon                       $time = null
     )
     {
+        $this->id = Str::uuid()->toString();
         $this->identity = Klaviyo::resolveIdentity($identity);
         $this->time = $time ?? Carbon::now();
     }
@@ -33,23 +36,27 @@ class TrackEvent
 
     public function toPayload(): array
     {
-        return array_merge_recursive([
-            'properties' => [],
-            'time'       => $this->time->toIso8601String(),
-            'metric'     => [
-                'data' => [
-                    'type'       => 'metric',
-                    'attributes' => [
-                        'name' => $this->metric_name,
+        return [
+            'type'       => 'event',
+            'attributes' => array_merge_recursive([
+                'properties' => [],
+                'time'       => $this->time->toIso8601String(),
+                'unique_id'  => $this->id,
+                'metric'     => [
+                    'data' => [
+                        'type'       => 'metric',
+                        'attributes' => [
+                            'name' => $this->metric_name,
+                        ]
                     ]
-                ]
-            ],
-            'profile'    => [
-                'data' => [
-                    'type'       => 'profile',
-                    'attributes' => Klaviyo::clientProfileToServerProfile($this->identity)
                 ],
-            ],
-        ], $this->payload);
+                'profile'    => [
+                    'data' => [
+                        'type'       => 'profile',
+                        'attributes' => Klaviyo::clientProfileToServerProfile($this->identity)
+                    ],
+                ],
+            ], $this->payload),
+        ];
     }
 }

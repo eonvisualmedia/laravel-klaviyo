@@ -39,7 +39,9 @@ class SendKlaviyoTrack implements ShouldQueue
                     ->withHeaders([
                         'revision' => $client->getApiVersion()
                     ])
-                    ->post($client->getEndpoint().'events', $this->toPayload($event));
+                    ->post($client->getEndpoint().'events', [
+                        'data' => $event->toPayload()
+                    ]);
             }
         };
 
@@ -50,17 +52,5 @@ class SendKlaviyoTrack implements ShouldQueue
         foreach ($responses as $response) {
             $response->throw();
         }
-    }
-
-    protected function toPayload(TrackEvent $event): array
-    {
-        return [
-            'data' => [
-                'type'       => 'event',
-                'attributes' => array_merge([
-                    'unique_id' => $this->job->uuid(),
-                ], $event->toPayload()),
-            ]
-        ];
     }
 }
