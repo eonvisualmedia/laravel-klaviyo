@@ -53,7 +53,7 @@ class TrackEvent
                 'profile'    => [
                     'data' => [
                         'type'       => 'profile',
-                        'attributes' => Klaviyo::clientProfileToServerProfile($this->identity)
+                        'attributes' => klaviyo_client_to_server_profile($this->identity)
                     ],
                 ],
             ], $this->payload),

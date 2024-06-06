@@ -367,18 +367,4 @@ class KlaviyoClient
 
         return $this->forwardCallTo($this->client(), $method, $parameters);
     }
-
-    /**
-     * Client and server api have different payloads; move unknown attributes to custom properties array
-     *
-     * @param array $attributes
-     * @return array
-     */
-    public function clientProfileToServerProfile(array $attributes): array
-    {
-        return collect(Arr::dot($attributes))
-            ->keyBy(fn($item, $key) => in_array(explode('.', $key)[0], self::SERVER_PROFILE_ATTRIBUTES) ? $key : "properties.{$key}")
-            ->undot()
-            ->all();
-    }
 }
