@@ -22,6 +22,11 @@ class SendKlaviyoTrack implements ShouldQueue
      */
     protected array $events;
 
+    /**
+     * @var int number of requests to execute concurrently
+     */
+    public int $concurrency = 5;
+
     public function __construct(TrackEvent ...$events)
     {
         $this->onQueue(config('klaviyo.queue'));
@@ -45,12 +50,12 @@ class SendKlaviyoTrack implements ShouldQueue
             }
         };
 
-        $responses = $client->pool(fn(Pool $pool) => [
-            Each::ofLimit($requests($pool), 5)
-        ]);
-
-        foreach ($responses as $response) {
-            $response->throw();
-        }
+        $client->pool(function (Pool $pool) use ($requests) {
+            Each::ofLimit(
+                $requests($pool),
+                $this->concurrency,
+                fn($response, $index) => $response->throw(),
+            )->wait();
+        });
     }
 }
