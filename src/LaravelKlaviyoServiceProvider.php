@@ -4,7 +4,6 @@ namespace EonVisualMedia\LaravelKlaviyo;
 
 use EonVisualMedia\LaravelKlaviyo\View\Creators\InitializeCreator;
 use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,8 +23,6 @@ class LaravelKlaviyoServiceProvider extends ServiceProvider
         }
 
         View::creator('klaviyo::initialize', InitializeCreator::class);
-
-        Blade::componentNamespace('EonVisualMedia\LaravelKlaviyo\Components', 'klaviyo');
     }
 
     /**
