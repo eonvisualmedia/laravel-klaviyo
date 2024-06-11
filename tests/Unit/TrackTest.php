@@ -157,4 +157,19 @@ class TrackTest extends TestCase
 
         Bus::assertNotDispatched(SendKlaviyoTrack::class);
     }
+
+    public function test_track_with_custom_unique_id()
+    {
+        $this->setUpMock();
+
+        Http::fake();
+
+        Klaviyo::track(TrackEvent::make('foo', ['unique_id' => 'foobar']));
+
+        Http::assertSent(function (Request $request) {
+            return $request->method() === 'POST' &&
+                $request->url() === 'https://a.klaviyo.com/api/events' &&
+                Arr::get($request, 'data.attributes.unique_id') === 'foobar';
+        });
+    }
 }
