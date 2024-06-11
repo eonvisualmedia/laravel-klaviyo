@@ -107,8 +107,8 @@ class KlaviyoClient
     public function __construct(array $config)
     {
         $this->endpoint = $config['endpoint'] ?? '';
-        $this->privateKey = $config['private_api_key'] ?: throw new InvalidArgumentException('Invalid private api key');
-        $this->publicKey = $config['public_api_key'] ?: throw new InvalidArgumentException('Invalid public api key');
+        $this->privateKey = $config['private_api_key'] ?? '';
+        $this->publicKey = $config['public_api_key'] ?? '';
         $this->apiVersion = $config['api_version'] ?: throw new InvalidArgumentException('Invalid API Version');
         $this->identityKeyName = $config['identity_key_name'] ?: throw new InvalidArgumentException('Invalid default identity key name');
         $this->enabled = $config['enabled'] ?? true;
