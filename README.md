@@ -1,12 +1,12 @@
 # laravel-klaviyo
 
-This package assists with interacting with Klaviyo to track client and server-side metrics and the REST api.
+This package assists with interacting with [Klaviyo](https://www.klaviyo.com/) to track client and server-side metrics and the REST api.
 
 ## Requirements
 
 For server-side track, identify or REST api calls this package utilises the Laravel HTTP Client.
 
-Server-side events should be processed in the background, by default jobs are placed on the `klaviyo` queue.
+It is recommended that server-side events are processed in the background, by default jobs are placed on the `klaviyo` queue.
 
 ## Installation
 
@@ -211,3 +211,14 @@ Klaviyo::delete("profile-subscription-bulk-delete-jobs", [
     ]
 ]);
 ```
+
+## Upgrading from v1
+
+The [Klaviyo](https://www.klaviyo.com/) legacy v1/v2 APIs are scheduled to retire June 30th, 2024.
+
+I would encourage you to review especially the breaking changes on the [Klaviyo: API versioning and deprecation policy](https://developers.klaviyo.com/en/docs/api_versioning_and_deprecation_policy)
+
+The API changes have therefore necessitated a few breaking changes to this package, specifically the payloads required for `identify` and `push`.
+See the examples below, for example the `getKlaviyoIdentity` response replaces `$email` with `email`.
+
+Also take note that client and server payloads for identify/profile have a few differences `klaviyo_client_to_server_profile` may be of assistance help converting client payloads to server profiles.
