@@ -115,7 +115,7 @@ class TrackEvent
     {
         return [
             'type'       => 'event',
-            'attributes' => array_merge_recursive([
+            'attributes' => array_replace_recursive([
                 'properties' => [],
                 'time'       => $this->timestamp->toIso8601String(),
                 'unique_id'  => $this->id,
