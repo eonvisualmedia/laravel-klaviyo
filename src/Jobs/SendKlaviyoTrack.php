@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Http\Client\Pool;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Log;
 
 class SendKlaviyoTrack implements ShouldQueue
 {
@@ -54,7 +55,11 @@ class SendKlaviyoTrack implements ShouldQueue
             Each::ofLimit(
                 $requests($pool),
                 $this->concurrency,
-                fn($response, $index) => $response->throw(),
+                fn(\Illuminate\Http\Client\Response $response, $index) => $response->throw(function (\Illuminate\Http\Client\Response $response, $exception) {
+                    Log::error("Klaviyo track request failed", [
+                        'response' => $response->json(),
+                    ]);
+                }),
             )->wait();
         });
     }

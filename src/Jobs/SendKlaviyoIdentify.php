@@ -6,6 +6,7 @@ use EonVisualMedia\LaravelKlaviyo\KlaviyoClient;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Facades\Log;
 
 class SendKlaviyoIdentify implements ShouldQueue
 {
@@ -26,6 +27,10 @@ class SendKlaviyoIdentify implements ShouldQueue
                     'attributes' => klaviyo_client_to_server_profile($this->attributes)
                 ]
             ])
-            ->throw();
+            ->throw(function ($response, $exception) {
+                Log::error("Klaviyo identify request failed", [
+                    'response' => $response->json(),
+                ]);
+            });
     }
 }
