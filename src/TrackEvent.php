@@ -3,27 +3,35 @@
 namespace EonVisualMedia\LaravelKlaviyo;
 
 use EonVisualMedia\LaravelKlaviyo\Contracts\KlaviyoIdentity;
-use EonVisualMedia\LaravelKlaviyo\Contracts\TrackEventInterface;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
-class TrackEvent implements TrackEventInterface
+class TrackEvent
 {
-    protected string $event;
-    protected array|null $properties;
-    protected string|KlaviyoIdentity|array|null $identity;
-    protected Carbon|null $timestamp;
+    public string $id;
+    public array $identity;
+    public Carbon $timestamp;
+
+    public function __construct(
+        public string                $metric_name,
+        public array                 $payload = [],
+        KlaviyoIdentity|string|array $identity = null,
+        Carbon                       $time = null
+    )
+    {
+        $this->id = Str::uuid()->toString();
+        $this->identity = Klaviyo::resolveIdentity($identity);
+        $this->timestamp = $time ?? Carbon::now();
+    }
 
     public static function make(
-        string $event,
-        array $properties = null,
+        string                       $metric_name,
+        array                        $payload = [],
         KlaviyoIdentity|string|array $identity = null,
-        Carbon $timestamp = null
-    ): TrackEvent {
-        return (new static())
-            ->setEvent($event)
-            ->setProperties($properties)
-            ->setIdentity($identity)
-            ->setTimestamp($timestamp);
+        Carbon                       $timestamp = null
+    ): TrackEvent
+    {
+        return new static($metric_name, $payload, $identity, $timestamp);
     }
 
     /**
@@ -31,16 +39,16 @@ class TrackEvent implements TrackEventInterface
      */
     public function getEvent(): string
     {
-        return $this->event;
+        return $this->metric_name;
     }
 
     /**
-     * @param  string  $event
+     * @param string $event
      * @return TrackEvent
      */
     public function setEvent(string $event): TrackEvent
     {
-        $this->event = $event;
+        $this->metric_name = $event;
 
         return $this;
     }
@@ -50,16 +58,16 @@ class TrackEvent implements TrackEventInterface
      */
     public function getProperties(): array|null
     {
-        return $this->properties;
+        return $this->payload;
     }
 
     /**
-     * @param  array|null  $properties
+     * @param array|null $properties
      * @return TrackEvent
      */
     public function setProperties(array|null $properties): TrackEvent
     {
-        $this->properties = $properties;
+        $this->payload = $properties;
 
         return $this;
     }
@@ -73,12 +81,12 @@ class TrackEvent implements TrackEventInterface
     }
 
     /**
-     * @param  KlaviyoIdentity|string|array|null  $identity
+     * @param KlaviyoIdentity|string|array|null $identity
      * @return TrackEvent
      */
     public function setIdentity(KlaviyoIdentity|string|array|null $identity): TrackEvent
     {
-        $this->identity = $identity;
+        $this->identity = Klaviyo::resolveIdentity($identity);
 
         return $this;
     }
@@ -92,13 +100,40 @@ class TrackEvent implements TrackEventInterface
     }
 
     /**
-     * @param  Carbon|null  $timestamp
+     * @param Carbon|null $timestamp
      * @return TrackEvent
+     * @deprecated $timestamp
      */
     public function setTimestamp(Carbon $timestamp = null): TrackEvent
     {
         $this->timestamp = $timestamp;
 
         return $this;
+    }
+
+    public function toPayload(): array
+    {
+        return [
+            'type'       => 'event',
+            'attributes' => array_replace_recursive([
+                'properties' => [],
+                'time'       => $this->timestamp->toIso8601String(),
+                'unique_id'  => $this->id,
+                'metric'     => [
+                    'data' => [
+                        'type'       => 'metric',
+                        'attributes' => [
+                            'name' => $this->metric_name,
+                        ]
+                    ]
+                ],
+                'profile'    => [
+                    'data' => [
+                        'type'       => 'profile',
+                        'attributes' => klaviyo_client_to_server_profile($this->identity)
+                    ],
+                ],
+            ], $this->payload),
+        ];
     }
 }

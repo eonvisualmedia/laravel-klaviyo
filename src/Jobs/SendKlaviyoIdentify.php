@@ -2,30 +2,35 @@
 
 namespace EonVisualMedia\LaravelKlaviyo\Jobs;
 
-use EonVisualMedia\LaravelKlaviyo\Http\Middleware\TrackAndIdentify;
 use EonVisualMedia\LaravelKlaviyo\KlaviyoClient;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class SendKlaviyoIdentify implements ShouldQueue
 {
     use Dispatchable;
     use Queueable;
 
-    public function __construct(protected array $identity)
+    public function __construct(protected array $attributes)
     {
         $this->onQueue(config('klaviyo.queue'));
     }
 
     public function handle(KlaviyoClient $client)
     {
-        $http = Http::baseUrl($client->getEndpoint())->withMiddleware(TrackAndIdentify::middleware());
-
-        $http->post('identify', [
-            'token' => $client->getPublicKey(),
-            'properties' => $this->identity,
-        ])->throw();
+        $client
+            ->post('profile-import', [
+                'data' => [
+                    'type'       => 'profile',
+                    'attributes' => klaviyo_client_to_server_profile($this->attributes)
+                ]
+            ])
+            ->throw(function ($response, $exception) {
+                Log::error("Klaviyo identify request failed", [
+                    'response' => $response->json(),
+                ]);
+            });
     }
 }

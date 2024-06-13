@@ -27,8 +27,13 @@ class IdentifyTest extends TestCase
 
         Http::assertSent(function (Request $request) {
             return $request->method() === 'POST' &&
-                $request->url() === 'https://a.klaviyo.com/api/identify' &&
-                $request['properties'] === ['$email' => 'foo'];
+                $request->url() === 'https://a.klaviyo.com/api/profile-import' &&
+                $request->data() === ['data' => [
+                    'type'       => 'profile',
+                    'attributes' => [
+                        'email' => 'foo'
+                    ]
+                ]];
         });
     }
 
@@ -38,9 +43,13 @@ class IdentifyTest extends TestCase
             $mock
                 ->shouldReceive('getKlaviyoIdentity')
                 ->andReturn([
-                    '$email' => 'foo',
-                    '$first_name' => 'Foo',
-                    '$last_name' => 'Bar',
+                    'email'      => 'foo',
+                    'first_name' => 'Foo',
+                    'last_name'  => 'Bar',
+                    'custom_123' => 'Baz',
+                    'properties' => [
+                        'foo' => 'bar'
+                    ]
                 ]);
         });
 
@@ -48,11 +57,20 @@ class IdentifyTest extends TestCase
 
         Http::assertSent(function (Request $request) {
             return $request->method() === 'POST' &&
-                $request->url() === 'https://a.klaviyo.com/api/identify' &&
-                $request['properties'] === [
-                    '$email' => 'foo',
-                    '$first_name' => 'Foo',
-                    '$last_name' => 'Bar',
+                $request->url() === 'https://a.klaviyo.com/api/profile-import' &&
+                $request->data() === [
+                    'data' => [
+                        'type'       => 'profile',
+                        'attributes' => [
+                            'email'      => 'foo',
+                            'first_name' => 'Foo',
+                            'last_name'  => 'Bar',
+                            'properties' => [
+                                'custom_123' => 'Baz',
+                                'foo'        => 'bar',
+                            ]
+                        ]
+                    ]
                 ];
         });
     }

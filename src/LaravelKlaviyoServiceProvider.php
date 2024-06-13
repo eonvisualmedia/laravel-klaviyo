@@ -16,9 +16,11 @@ class LaravelKlaviyoServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->publishes([
-            __DIR__.'/../config/klaviyo.php' => config_path('klaviyo.php'),
-        ]);
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__.'/../config/klaviyo.php' => config_path('klaviyo.php'),
+            ], ['klaviyo', 'klaviyo-config']);
+        }
 
         View::creator('klaviyo::initialize', InitializeCreator::class);
     }

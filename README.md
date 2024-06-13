@@ -1,16 +1,12 @@
 # laravel-klaviyo
 
-This package assists with interacting with Klaviyo to track client and server-side metrics and the REST api.
+This package assists with interacting with [Klaviyo](https://www.klaviyo.com/) to track client and server-side metrics and the REST api.
 
 ## Requirements
 
-For server-side track, identify or REST api calls this package utilises the Laravel HTTP Client, therefore if required you should install `guzzlehttp/guzzle` via Composer:
+For server-side track, identify or REST api calls this package utilises the Laravel HTTP Client.
 
-```bash
-composer require guzzlehttp/guzzle
-```
-
-Additionally, server-side events are queued you should configure a queue worker to process jobs which by default are on the `klaviyo` queue.
+It is recommended that server-side events are processed in the background, by default jobs are placed on the `klaviyo` queue.
 
 ## Installation
 
@@ -63,16 +59,16 @@ Alternatively the identify method may be called explicitly, for instance after u
 
 ```php
 Klaviyo::identify([
-    '$email' => 'foo@example.com',
-    '$first_name' => 'Foo',
-    '$last_name' => 'Bar'
+    'email' => 'foo@example.com',
+    'first_name' => 'Foo',
+    'last_name' => 'Bar'
 ]);
 ```
 
 #### Track events client-side
 
 ```php
-Klaviyo::push('track', 'Added to Cart' [
+Klaviyo::push('track', 'Added to Cart', [
     '$value' => 100,
     'AddedTitle' => 'Widget A'
 ]);
@@ -86,8 +82,8 @@ To queue server-side events.
 Klaviyo::track(TrackEvent::make(
     'Placed Order',
     [
-        '$event_id' => '1234_WINNIEPOOH',
-        '$value' => 9.99,
+        'unique_id' => '1234_WINNIEPOOH',
+        'value' => 9.99,
     ]
 ));
 ```
@@ -99,13 +95,13 @@ is an instance of `EonVisualMedia\LaravelKlaviyo\Contracts\KlaviyoIdentity`.
 Klaviyo::track(TrackEvent::make(
     'Placed Order',
     [
-         '$event_id' => '1234_WINNIEPOOH',
-         '$value' => 9.99,
+         'unique_id' => '1234_WINNIEPOOH',
+         'value' => 9.99,
     ],
     [
-        '$email' => 'foo@example.com',
-        '$first_name' => 'Foo',
-        '$last_name' => 'Bar'
+        'email' => 'foo@example.com',
+        'first_name' => 'Foo',
+        'last_name' => 'Bar',
     ],
     now()->addWeeks(-1)
 ));
@@ -151,18 +147,78 @@ Klaviyo::fulfilled_order($transaction);
 
 #### REST
 
-You may interact with the Klaviyo REST api using the Laravel HTTP Client, helper methods exposed on this package append the `api_key=PRIVATE_API_KEY` to requests.
+You may interact with the Klaviyo REST api using the Laravel HTTP Client, calls forwarded via KlaviyoClient append a `Authorization: Klaviyo-API-Key your-private-api-key` header to requests.
 
 ```php
-Klaviyo::delete('v2/list/{list_id}/subscribe', [
-    'emails' => ['foo@example.com']
+Klaviyo::get('lists');
+
+Klaviyo::post("profile-subscription-bulk-create-jobs", [
+    'data' => [
+        'type'          => 'profile-subscription-bulk-create-job',
+        'attributes'    => [
+            'profiles' => [
+                'data' => [
+                    [
+                        'type'       => 'profile',
+                        'attributes' => [
+                            'email'         => 'foo@example.com',
+                            'subscriptions' => [
+                                'email' => [
+                                    'marketing' => [
+                                        'consent' => 'SUBSCRIBED'
+                                    ]
+                                ],
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ],
+        'relationships' => [
+            'list' => [
+                'data' => [
+                    'type' => 'list',
+                    'id'   => $list_id
+                ]
+            ]
+        ]
+    ]
 ]);
 
-Klaviyo::get('v2/lists');
-
-Klaviyo::post('v2/list/{list_id}/subscribe', [
-    'profiles' => [
-        ['email' => 'foo@example.com']
+Klaviyo::delete("profile-subscription-bulk-delete-jobs", [
+    'data' => [
+        'type'          => 'profile-subscription-bulk-delete-job',
+        'attributes'    => [
+            'profiles' => [
+                'data' => [
+                    [
+                        'type'       => 'profile',
+                        'attributes' => [
+                            'email' => 'foo@example.com',
+                        ]
+                    ]
+                ]
+            ]
+        ],
+        'relationships' => [
+            'list' => [
+                'data' => [
+                    'type' => 'list',
+                    'id'   => $list_id
+                ]
+            ]
+        ]
     ]
 ]);
 ```
+
+## Upgrading from v1
+
+The [Klaviyo](https://www.klaviyo.com/) legacy v1/v2 APIs are scheduled to retire June 30th, 2024.
+
+I would encourage you to review especially the breaking changes on the [Klaviyo: API versioning and deprecation policy](https://developers.klaviyo.com/en/docs/api_versioning_and_deprecation_policy)
+
+The API changes have therefore necessitated a few breaking changes to this package, specifically the payloads required for `identify` and `push`.
+See the examples below, for example the `getKlaviyoIdentity` response replaces `$email` with `email`.
+
+Also take note that client and server payloads for identify/profile have a few differences `klaviyo_client_to_server_profile` may be of assistance help converting client payloads to server profiles.

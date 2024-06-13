@@ -14,7 +14,7 @@ class TestUser extends Authenticatable implements KlaviyoIdentity
     public function getKlaviyoIdentity(): array
     {
         return [
-            '$email' => $this->email,
+            'email' => $this->email,
         ];
     }
 }

@@ -15,7 +15,7 @@ use InvalidArgumentException;
 
 class TrackTest extends TestCase
 {
-    protected function setUpMock($identity = ['$exchange_id' => 'foo'])
+    protected function setUpMock($identity = ['_kx' => 'foo'])
     {
         Klaviyo::partialMock()->shouldReceive('getIdentity')->andReturn($identity);
     }
@@ -32,11 +32,10 @@ class TrackTest extends TestCase
 
         Http::assertSent(function (Request $request) {
             return $request->method() === 'POST' &&
-                $request->url() === 'https://a.klaviyo.com/api/track' &&
-                Arr::get($request, 'event') === 'foo' &&
-                Arr::get($request, 'customer_properties') === ['$exchange_id' => 'foo'] &&
-                Arr::get($request, 'time') === now()->getTimestamp() &&
-                ! Arr::has($request, 'properties');
+                $request->url() === 'https://a.klaviyo.com/api/events' &&
+                Arr::get($request, 'data.attributes.metric.data.attributes.name') === 'foo' &&
+                Arr::get($request, 'data.attributes.profile.data.attributes._kx') === 'foo' &&
+                Arr::get($request, 'data.attributes.time') === now()->toIso8601String();
         });
     }
 
@@ -48,15 +47,15 @@ class TrackTest extends TestCase
 
         $this->travelTo(now());
 
-        Klaviyo::track(TrackEvent::make('foo', ['foo' => 'bar']));
+        Klaviyo::track(TrackEvent::make('foo', ['properties' => ['foo' => 'bar']]));
 
         Http::assertSent(function (Request $request) {
             return $request->method() === 'POST' &&
-                $request->url() === 'https://a.klaviyo.com/api/track' &&
-                $request['event'] === 'foo' &&
-                $request['customer_properties'] === ['$exchange_id' => 'foo'] &&
-                $request['time'] === now()->getTimestamp() &&
-                $request['properties'] === ['foo' => 'bar'];
+                $request->url() === 'https://a.klaviyo.com/api/events' &&
+                Arr::get($request, 'data.attributes.metric.data.attributes.name') === 'foo' &&
+                Arr::get($request, 'data.attributes.profile.data.attributes._kx') === 'foo' &&
+                Arr::get($request, 'data.attributes.time') === now()->toIso8601String() &&
+                Arr::get($request, 'data.attributes.properties') === ['foo' => 'bar'];
         });
     }
 
@@ -83,25 +82,24 @@ class TrackTest extends TestCase
 
         Klaviyo::track(
             TrackEvent::make('foo'),
-            TrackEvent::make('foo', ['foo' => 'bar'])
+            TrackEvent::make('foo', ['properties' => ['foo' => 'bar']]),
         );
 
         Http::assertSent(function (Request $request) {
             return $request->method() === 'POST' &&
-                $request->url() === 'https://a.klaviyo.com/api/track' &&
-                Arr::get($request, 'event') === 'foo' &&
-                Arr::get($request, 'customer_properties') === ['$exchange_id' => 'foo'] &&
-                Arr::get($request, 'time') === now()->getTimestamp() &&
-                ! Arr::has($request, 'properties');
+                $request->url() === 'https://a.klaviyo.com/api/events' &&
+                Arr::get($request, 'data.attributes.metric.data.attributes.name') === 'foo' &&
+                Arr::get($request, 'data.attributes.profile.data.attributes._kx') === 'foo' &&
+                Arr::get($request, 'data.attributes.time') === now()->toIso8601String();
         });
 
         Http::assertSent(function (Request $request) {
             return $request->method() === 'POST' &&
-                $request->url() === 'https://a.klaviyo.com/api/track' &&
-                Arr::get($request, 'event') === 'foo' &&
-                Arr::get($request, 'customer_properties') === ['$exchange_id' => 'foo'] &&
-                Arr::get($request, 'time') === now()->getTimestamp() &&
-                Arr::get($request, 'properties') === ['foo' => 'bar'];
+                $request->url() === 'https://a.klaviyo.com/api/events' &&
+                Arr::get($request, 'data.attributes.metric.data.attributes.name') === 'foo' &&
+                Arr::get($request, 'data.attributes.profile.data.attributes._kx') === 'foo' &&
+                Arr::get($request, 'data.attributes.time') === now()->toIso8601String() &&
+                Arr::get($request, 'data.attributes.properties') === ['foo' => 'bar'];
         });
     }
 
@@ -110,7 +108,20 @@ class TrackTest extends TestCase
         $this->setUpMock();
 
         Http::fake([
-            'track' => Http::response('0', 200),
+            '*' => Http::response([
+                'errors' => [
+                    [
+                        "id"     => "string",
+                        "code"   => 401,
+                        "title"  => "string",
+                        "detail" => "string",
+                        "source" => [
+                            "pointer"   => "string",
+                            "parameter" => "string"
+                        ]
+                    ]
+                ]
+            ], 401)
         ]);
 
         $this->expectException(RequestException::class);
@@ -123,7 +134,7 @@ class TrackTest extends TestCase
         $this->setUpMock();
 
         Http::fake([
-            'track' => Http::response(null, 500),
+            '*' => Http::response(null, 500),
         ]);
 
         $this->expectException(RequestException::class);
@@ -140,10 +151,25 @@ class TrackTest extends TestCase
         Bus::fake();
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Identify requires one of the following fields: $email, $id, $phone_number, $exchange_id');
+        $this->expectExceptionMessage('Identify requires one of the following fields: email, id, phone_number, _kx');
 
         Klaviyo::track(TrackEvent::make('foo'));
 
         Bus::assertNotDispatched(SendKlaviyoTrack::class);
+    }
+
+    public function test_track_with_custom_unique_id()
+    {
+        $this->setUpMock();
+
+        Http::fake();
+
+        Klaviyo::track(TrackEvent::make('foo', ['unique_id' => 'foobar']));
+
+        Http::assertSent(function (Request $request) {
+            return $request->method() === 'POST' &&
+                $request->url() === 'https://a.klaviyo.com/api/events' &&
+                Arr::get($request, 'data.attributes.unique_id') === 'foobar';
+        });
     }
 }

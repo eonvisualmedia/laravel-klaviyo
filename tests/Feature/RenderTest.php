@@ -27,9 +27,10 @@ class RenderTest extends TestCase
         $this
             ->actingAs($user)
             ->get('/render')
-            ->assertSee('https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=bar')
-            ->assertSeeText("_learnq.push(['identify', JSON.parse('{\u0022\$email\u0022:\u0022foo@bar\u0022}')]);", false)
-            ->assertSeeText("_learnq.push(['track', 'event', JSON.parse('{\u0022foo\u0022:\u0022bar\u0022}')]);", false)
-            ->assertSeeText("_learnq.push(['track', 'event']);", false);
+            ->assertSee([
+                'klaviyo.identify({"email":"foo@bar"}, function () {',
+                'klaviyo.push(["track", "event", {"foo":"bar"}]);',
+                'klaviyo.push(["track", "event"]);'
+            ], false);
     }
 }

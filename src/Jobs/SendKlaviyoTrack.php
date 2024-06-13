@@ -2,65 +2,65 @@
 
 namespace EonVisualMedia\LaravelKlaviyo\Jobs;
 
-use EonVisualMedia\LaravelKlaviyo\Contracts\TrackEventInterface;
-use EonVisualMedia\LaravelKlaviyo\Http\Middleware\TrackAndIdentify;
 use EonVisualMedia\LaravelKlaviyo\KlaviyoClient;
-use GuzzleHttp\Promise\EachPromise;
+use EonVisualMedia\LaravelKlaviyo\TrackEvent;
+use GuzzleHttp\Promise\Each;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\Pool;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Log;
 
 class SendKlaviyoTrack implements ShouldQueue
 {
     use Dispatchable;
+    use InteractsWithQueue;
     use Queueable;
 
     /**
-     * Unix timestamp of when the event occurred.
-     *
-     * @link https://php.net/manual/en/datetime.gettimestamp.php
+     * @var array|TrackEvent[]
      */
-    protected int $timestamp;
-
     protected array $events;
 
-    public function __construct(TrackEventInterface ...$events)
+    /**
+     * @var int number of requests to execute concurrently
+     */
+    public int $concurrency = 5;
+
+    public function __construct(TrackEvent ...$events)
     {
         $this->onQueue(config('klaviyo.queue'));
-        $this->timestamp = now()->getTimestamp();
         $this->events = $events;
     }
 
     public function handle(KlaviyoClient $client)
     {
-        $http = Http::baseUrl($client->getEndpoint())->async()->withMiddleware(TrackAndIdentify::middleware());
-
-        $requests = function () use ($http, $client) {
+        $requests = function (Pool $pool) use ($client) {
             foreach ($this->events as $event) {
-                $payload = [
-                    'token' => $client->getPublicKey(),
-                    'event' => $event->getEvent(),
-                    'customer_properties' => $event->getIdentity(),
-                    'time' => $event->getTimestamp()?->getTimestamp() ?? $this->timestamp,
-                ];
-
-                if (null !== $event->getProperties()) {
-                    $payload['properties'] = $event->getProperties();
-                }
-
-                yield $http->post('track', $payload);
+                yield $pool
+                    ->acceptJson()
+                    ->asJson()
+                    ->withToken($client->getPrivateKey(), 'Klaviyo-API-Key')
+                    ->withHeaders([
+                        'revision' => $client->getApiVersion()
+                    ])
+                    ->post($client->getEndpoint().'events', [
+                        'data' => $event->toPayload()
+                    ]);
             }
         };
 
-        $promise = (new EachPromise($requests(), [
-            'concurrency' => 5,
-            'fulfilled' => function (Response $response) {
-                throw_if($response->failed(), $response->toException());
-            },
-        ]))->promise();
-
-        $promise->wait();
+        $client->pool(function (Pool $pool) use ($requests) {
+            Each::ofLimit(
+                $requests($pool),
+                $this->concurrency,
+                fn(\Illuminate\Http\Client\Response $response, $index) => $response->throw(function (\Illuminate\Http\Client\Response $response, $exception) {
+                    Log::error("Klaviyo track request failed", [
+                        'response' => $response->json(),
+                    ]);
+                }),
+            )->wait();
+        });
     }
 }
