@@ -23,4 +23,14 @@ return [
 
     'identity_key_name' => env('KLAVIYO_IDENTITY_KEY_NAME', 'email'),
 
+    /**
+     * Key under which to flash data to the session.
+     */
+    'session_key'       => env('KLAVIYO_SESSION_KEY', '_klaviyo'),
+
+    /**
+     * Push a klaviyo.identify(...) call after a \Illuminate\Auth\Events\Login event
+     */
+    'identify_on_login' => env('KLAVIYO_IDENTITY_ON_LOGIN', true),
+
 ];

@@ -107,6 +107,12 @@ Klaviyo::track(TrackEvent::make(
 ));
 ```
 
+### Monitoring Login Events
+
+By default, the package will subscribe to `Illuminate\Auth\Events\Login` events and dispatch an `klaviyo.identify(...)` call.
+
+This behaviour can be disabled using the config option `identify_on_login`.
+
 ### Advanced usage
 
 #### Macros
