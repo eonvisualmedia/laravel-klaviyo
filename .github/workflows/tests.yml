@@ -6,60 +6,51 @@ on:
 
 jobs:
   tests:
-    runs-on: ${{ matrix.os }}
-
+    runs-on: ubuntu-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        os: [ ubuntu-latest ]
-        php: [ '8.0', 8.1, 8.2, 8.3 ]
-        stability: [ prefer-lowest, prefer-stable ]
+        php: [ 8.5, 8.4, 8.3, 8.2, 8.1 ]
+        laravel: [ 13.*, 12.*, 11.*, 10.* ]
+        dependency-version: [ prefer-lowest, prefer-stable ]
+        include:
+          - laravel: 13.*
+            testbench: 11.*
+          - laravel: 12.*
+            testbench: 10.*
+          - laravel: 11.*
+            testbench: 9.*
+          - laravel: 10.*
+            testbench: 8.*
+        exclude:
+          - php: 8.4
+            laravel: 10.*
+          - php: 8.1
+            laravel: 11.*
+          - php: 8.1
+            laravel: 12.*
+          - php: 8.1
+            laravel: 13.*
+          - php: 8.2
+            laravel: 13.*
+          - php: 8.5
+            laravel: 10.*
 
-    name: PHP ${{ matrix.php }} - ${{ matrix.stability }}
+    name: PHP ${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.dependency-version }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, gd, igbinary, msgpack, lzf, zstd, lz4
-          ini-values: error_reporting=E_ALL
-          tools: composer:v2
           coverage: none
 
-      - name: Set Minimum PHP 8.0 Versions
-        uses: nick-invision/retry@v1
-        with:
-          timeout_minutes: 5
-          max_attempts: 5
-          command: composer require guzzlehttp/guzzle:^7.2 --no-interaction --no-update
-        if: matrix.php >= 8
-
-      - name: Set Minimum PHP 8.1 Versions
-        uses: nick-invision/retry@v1
-        with:
-          timeout_minutes: 5
-          max_attempts: 5
-          command: composer require ramsey/collection:^1.2 brick/math:^0.9.3 --no-interaction --no-update
-        if: matrix.php >= 8.1
-
-      - name: Set Minimum PHP 8.2 Versions
-        uses: nick-invision/retry@v1
-        with:
-          timeout_minutes: 5
-          max_attempts: 5
-          command: composer require nesbot/carbon:^2.62.1 --no-interaction --no-update
-        if: matrix.php >= 8.2
-
       - name: Install dependencies
-        uses: nick-invision/retry@v1
-        with:
-          timeout_minutes: 5
-          max_attempts: 5
-          command: composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
+        run: composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
 
       - name: Execute tests
-        run: vendor/bin/phpunit --verbose
+        run: vendor/bin/pest
